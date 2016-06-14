@@ -171,6 +171,7 @@ function calcHoleColor(hole) {
 
 
 function startRoundAnim() {
+    console.log('startign the round ');
     //do these in parallel
     doAnim(
         { at:500,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
@@ -363,6 +364,9 @@ function connect() {
         channel:CHANNEL_NAME,
         message: function(msg,env,chan) {
             console.log("got a message",msg,env,chan);
+            if(msg.type == 'action') {
+                executeRemoteAction(msg);
+            }
         },
         connect: function() {
             console.log("connected to pubnub");
@@ -385,6 +389,18 @@ function connect() {
         }
     });
 
+}
+
+var ACTIONS = {
+    start: function() {
+        console.log("starting the game");
+        startRoundAnim();
+    }
+}
+
+function executeRemoteAction(act) {
+    console.log("executing action", act.action);
+    ACTIONS[act.action]();
 }
 
 /*

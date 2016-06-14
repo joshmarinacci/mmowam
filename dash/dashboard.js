@@ -9,6 +9,9 @@ var COLORS = ["red","green","blue","orange","black","white","purple",'brown','gr
 var FLAVORS = ["salty",'sweet','spicy','tangy','sour','bland'];
 var ANIMALS = ['bear','cat','chipmunk','dog','wolf','fox','lion','tiger','elephant'];
 
+var pubnub = null;
+var CHANNEL_NAME = "simple-channel";
+
 function pick(arr) {
     return arr[Math.floor(Math.random()*arr.length)];
 }
@@ -49,7 +52,13 @@ function setup() {
 
 
 function startGame() {
-    console.log("the game is starting");
+    pubnub.publish({
+        channel:CHANNEL_NAME,
+        message: {
+            "type":"action",
+            "action":"start"
+        }
+    })
 }
 
 function sync() {
@@ -79,8 +88,7 @@ function onClick(id, cb) {
     elem.addEventListener('click',cb);
 }
 
-var pubnub = null;
-var CHANNEL_NAME = "simple-channel";
+
 function connect() {
     console.log("connecting to pubnub");
     pubnub = PUBNUB({
