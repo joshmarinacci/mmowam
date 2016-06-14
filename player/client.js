@@ -3,6 +3,9 @@
  */
 
 
+var pubnub = null;
+var CHANNEL_NAME = "simple-channel";
+
 var tapWaitStart = -1;
 var activeHole = null;
 var inputBlocked = false;
@@ -291,12 +294,25 @@ function animHoleGood(hole) {
 
 function incrementScore() {
     score += 1;
+    pubnub.state({
+        channel:CHANNEL_NAME,
+        state: {
+            score:score
+        }
+    });
 }
 function playGoodSound() {
     //noop
 }
 function incrementBadTap() {
     missedText.text += 1;
+    console.log("sending a missed tap");
+    pubnub.state({
+        channel:CHANNEL_NAME,
+        state: {
+            missed:missedText.text
+        }
+    });
 }
 function animHoleBad(hole) {
     doAnim(
@@ -346,11 +362,9 @@ function holeTap(hole) {
 }
 
 
-var pubnub = null;
 
 function connect() {
     console.log("connecting to pubnub");
-    var CHANNEL_NAME = "simple-channel";
     pubnub = PUBNUB({
         publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
         subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
@@ -392,15 +406,15 @@ function connect() {
 }
 
 var ACTIONS = {
-    start: function() {
-        console.log("starting the game");
+    start: function(args) {
+        console.log("starting the game", args);
         startRoundAnim();
     }
-}
+};
 
 function executeRemoteAction(act) {
     console.log("executing action", act.action);
-    ACTIONS[act.action]();
+    ACTIONS[act.action](act.data);
 }
 
 /*

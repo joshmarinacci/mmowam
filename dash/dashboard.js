@@ -32,18 +32,12 @@ var state = {
     channelName:"no-name",
     status:"no-game",
     playerCount:0,
-    playerList: [{
-        uuid:'billy',
-        state: {
-            name:'bobby'
-        }
-    }],
+    playerList: [],
     connectionStatus:"not-connected"
 };
 
 
 function setup() {
-    //state.randomSeed = Math.floor(Math.random()*10*1000);
     state.channelName = pick(COLORS)+'-'+pick(FLAVORS) + '-' + pick(ANIMALS);
     sync();
     connect();
@@ -52,11 +46,16 @@ function setup() {
 
 
 function startGame() {
+    state.randomSeed = Math.floor(Math.random()*10*1000);
+    sync();
     pubnub.publish({
         channel:CHANNEL_NAME,
         message: {
             "type":"action",
-            "action":"start"
+            "action":"start",
+            "data": {
+                "seed":state.randomSeed
+            }
         }
     })
 }
@@ -79,7 +78,7 @@ function syncDom(id, value) {
 function syncPlayerList(id, value) {
     var elem = document.getElementById(id);
     elem.innerHTML = value.map(function(player) {
-        return "<li>some player: " + player.uuid + " " + player.state.name + "</li>"
+        return "<li>" + player.uuid + ": name = " + player.state.name + " score = " + player.state.score + "</li>"
     }).join("");
 }
 
@@ -103,7 +102,7 @@ function connect() {
     pubnub.subscribe({
         channel:CHANNEL_NAME,
         message: function(msg,env,chan) {
-            console.log("got a message",msg,env,chan);
+            //console.log("got a message",msg,env,chan);
         },
         connect: function() {
             console.log("connected to pubnub");
@@ -116,23 +115,50 @@ function connect() {
             sync();
         },
         presence: function(m) {
-            console.log("presence event",m);
-            console.log("occupancy = ", m.occupancy);
+            //console.log("presence event",m);
             state.playerCount = m.occupancy - 1;
+            if(m.action == 'state-change') {
+                setPlayerState(m);
+            }
             sync();
-            getPlayerList();
-        },
+        }
     })
 }
 
+
+function setPlayerState(change) {
+    var players = state.playerList.filter(function(pl) {
+        if(pl.uuid == change.uuid) return true;
+        return false;
+    });
+    var player = null;
+    if(players.length == 1) {
+        //console.log("found the player");
+        player = players[0];
+    } else {
+        //console.log("didn't find the player. adding");
+        var obj = {uuid: change.uuid, state:{
+            missed:0,
+            score:0
+        }};
+        state.playerList.push(obj);
+        player = obj;
+    }
+    console.log("keys = ",Object.keys(change.data));
+    Object.keys(change.data).forEach(function(key) {
+        console.log("setting",key,'to',change.data[key]);
+        player.state[key] = change.data[key];
+    });
+    console.log("now player is", player, player.state);
+
+}
 function getPlayerList() {
     pubnub.here_now({
         channel: CHANNEL_NAME,
         state:true,
         callback: function(m) {
-            console.log("list of users", m.uuids);
+            //console.log("list of users", m.uuids);
             var ids = m.uuids.filter(function(user) { return user.uuid !== 'dashboard'});
-            console.log(ids);
             state.playerList = ids;
             sync()
         }
