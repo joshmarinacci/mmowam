@@ -79,7 +79,9 @@ function setup() {
 
     drawScreen();
 
-    startRoundAnim();
+    //startRoundAnim();
+
+    connect();
 }
 
 
@@ -343,6 +345,47 @@ function holeTap(hole) {
 }
 
 
+var pubnub = null;
+
+function connect() {
+    console.log("connecting to pubnub");
+    var CHANNEL_NAME = "simple-channel";
+    pubnub = PUBNUB({
+        publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
+        subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
+        error: function(err) {
+            console.log("error",err);
+        },
+        uuid:'billy'
+    });
+
+    pubnub.subscribe({
+        channel:CHANNEL_NAME,
+        message: function(msg,env,chan) {
+            console.log("got a message",msg,env,chan);
+        },
+        connect: function() {
+            console.log("connected to pubnub");
+            //state.connectionStatus = "connected";
+            //sync();
+        },
+        disconnect: function() {
+            //state.connectionStatus = "disconnected";
+            //sync();
+        }
+    });
+
+    pubnub.state({
+        channel:CHANNEL_NAME,
+        state: {
+            "name":"Master Bonny"
+        },
+        callback: function(m) {
+            console.log("the state was sent");
+        }
+    });
+
+}
 
 /*
  Start round

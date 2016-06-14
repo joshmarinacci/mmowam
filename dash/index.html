@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MMOWAM Dashboard</title>
+    <script type="text/javascript" src="https://cdn.pubnub.com/pubnub-3.15.1.js"></script>
+</head>
+<body>
+
+<!--
+//display a randomly generated channel name
+//connect to the channel
+realtime update of how many people are connected
+indicate when the game starts
+
+set UUID permanently in a cookie or local storage so if you hit reload
+you don't count twice
+-->
+
+
+<h1>MMOWAM</h1>
+<h2>Channel Name:  <b id="channel-name">spicy-green-chipmunk</b></h2>
+<h2>Players</h2>
+<ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
+<h3>player count <b id="player-count"></b></h3>
+<h4>Connection status: <b id="connection-status"></b></h4>
+
+<h2>Game status <b id="game-status"></b></h2>
+<ul>
+    <li>Random seed = <b id="random-seed">00000</b></li>
+</ul>
+
+<button id="start-game">Start Game</button>
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>
