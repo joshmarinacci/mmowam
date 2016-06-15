@@ -86,6 +86,7 @@ function convertMouseToHole(e) {
     var hole = grid[pt.x+pt.y*4];
     return hole;
 }
+
 function setup() {
     canvas = document.getElementById('canvas');
     canvas.addEventListener("mousedown", function(e) {
@@ -111,7 +112,6 @@ function setup() {
 
     connect();
 }
-
 
 function checkInput() {
     if(tapWaitStart == -1) return;
@@ -197,7 +197,6 @@ function calcHoleColor(hole) {
     }
 }
 
-
 function startRoundAnim() {
     console.log('startign the round ');
     startText.text = "Tap only the RED holes";
@@ -215,8 +214,6 @@ function startRoundAnim() {
     round_in_progress = true;
 }
 
-
-
 function endRound() {
     tapWaitStart = -1;
     startText.text  = "Round Over";
@@ -228,9 +225,6 @@ function endRound() {
     activeHole = null;
     resetGrid();
 }
-
-
-
 
 function pickRandomHole(grid) {
     return Math.floor(Math.random()*grid.length);
@@ -333,17 +327,19 @@ function holeTap(hole) {
     }
 }
 
-
-
 function connect() {
     console.log("connecting to pubnub");
+    var uuid = 'billy';
+    if(settings.uuid) {
+        uuid = settings.uuid;
+    }
     pubnub = PUBNUB({
         publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
         subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
         error: function(err) {
             console.log("error",err);
         },
-        uuid:'billy'
+        uuid:uuid
     });
 
     pubnub.subscribe({
@@ -368,7 +364,7 @@ function connect() {
     pubnub.state({
         channel:CHANNEL_NAME,
         state: {
-            "name":"Master Bonny"
+            "name":uuid
         },
         callback: function(m) {
             console.log("the state was sent");
@@ -392,20 +388,5 @@ function executeRemoteAction(act) {
     console.log("executing action", act.action);
     ACTIONS[act.action](act.data);
 }
-
-/*
- Start round
- Draw grid
- Change colors at a target speed and simultaneous rate
- Switch color back and increment score if tap
- If wrong tap paralyze for 1 sec
- Show current score
- End round and say congrats
- Start music at start of round
- Make tap sound effect
- Make change color effect
- Make missed tap effect
- Make wrong color tap effect
- */
 
 setup();
