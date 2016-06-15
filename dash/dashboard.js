@@ -216,8 +216,8 @@ function getPlayerList() {
     pubnub.here_now({
         channel: CHANNEL_NAME,
         state:true,
+        uuids:true,
         callback: function(m) {
-            //console.log("list of users", m.uuids);
             var ids = m.uuids.filter(function(user) { return user.uuid !== 'dashboard'});
             state.playerList = ids;
             sync()

@@ -11,6 +11,10 @@ var activeHole = null;
 var inputBlocked = false;
 
 var round_in_progress = false;
+var playerState = {
+    uuid:"unknown-uuid",
+    score:0
+};
 var STATES = {
     INACTIVE: 0,
     ACTIVE: 1,
@@ -40,7 +44,6 @@ function resetGrid() {
 var radius = 40;
 var xoff = 0;
 var yoff = 200;
-var score = 0;
 
 var startText = {
     text : "Tap only the RED holes",
@@ -161,7 +164,7 @@ function drawOverlayText() {
     ctx.save();
     ctx.font = '50pt Arial';
     ctx.fillStyle = "#33aa88";
-    ctx.fillText(""+score, 30, 70);
+    ctx.fillText(""+playerState.score, 30, 70);
     ctx.restore();
 
     ctx.save();
@@ -185,22 +188,14 @@ function drawGrid(grid) {
 }
 
 function calcHoleColor(hole) {
-    if(hole.state == STATES.INACTIVE) {
-        return "black";
-    }
-    if(hole.state == STATES.ACTIVE) {
-        var str = 'rgba('+Math.floor(hole.highlight*255)+',0,0,1)';
-//        console.log(str);
-        //return 'green';
-        //return "green";
-        return str;
-    }
+    if(hole.state == STATES.INACTIVE) return "black";
+    if(hole.state == STATES.ACTIVE)   return 'rgba('+Math.floor(hole.highlight*255)+',0,0,1)';
 }
 
 function startRoundAnim() {
     console.log('startign the round ');
     startText.text = "Tap only the RED holes";
-    score = 0;
+    playerState.score = 0;
     missedText.text = 0;
     resetGrid();
     inputBlocked = false;
@@ -212,6 +207,7 @@ function startRoundAnim() {
         //{ at: 10*1000, fun: endRound }
     );
     round_in_progress = true;
+    updateState();
 }
 
 function endRound() {
@@ -254,27 +250,22 @@ function animHoleGood(hole) {
     );
 }
 
-function incrementScore() {
-    score += 1;
+function updateState() {
     pubnub.state({
         channel:CHANNEL_NAME,
-        state: {
-            score:score
-        }
+        state: playerState
     });
+}
+
+function incrementScore() {
+    playerState.score += 1;
+    updateState();
 }
 function playGoodSound() {
     //noop
 }
 function incrementBadTap() {
     missedText.text += 1;
-    console.log("sending a missed tap");
-    pubnub.state({
-        channel:CHANNEL_NAME,
-        state: {
-            missed:missedText.text
-        }
-    });
 }
 function animHoleBad(hole) {
     doAnim(
@@ -361,16 +352,8 @@ function connect() {
         }
     });
 
-    pubnub.state({
-        channel:CHANNEL_NAME,
-        state: {
-            "name":uuid
-        },
-        callback: function(m) {
-            console.log("the state was sent");
-        }
-    });
-
+    playerState.name = uuid;
+    updateState();
 }
 
 var ACTIONS = {
