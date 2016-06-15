@@ -5,6 +5,9 @@
     <title>MMOWAM Dashboard</title>
     <script type="text/javascript" src="https://cdn.pubnub.com/pubnub-3.15.1.js"></script>
     <style type="text/css">
+        html, body {
+            font-size: 24pt;
+        }
         #countdown-overlay {
             visibility: hidden;
             padding: 1em;
@@ -16,7 +19,6 @@
             background-color: white;
             border: 5px solid black;
             border-radius: 1em;
-            
             text-align: center;
             font-size: 400%;
             opacity: 0.9;
@@ -48,23 +50,29 @@
 
         #player-list {
             position: absolute;
-            top: 20%;
+            top: 15%;
             left: 3%;
             right: 3%;
-            bottom: 10%;
+            bottom: 15%;
             border: 5px solid black;
+            background-color: greenyellow;
+        }
+
+        #active-players {
+            bottom: 8%;
+            left: 3%;
         }
 
         #url {
-            bottom: 3%;
+            bottom: 2%;
             left: 3%;
         }
 
 
         #screen {
             position: fixed;
-            border: 5px solid red;
-            background-color: blue;
+            border: 0px solid red;
+            background-color: yellowgreen;
             padding: 0;
             margin: 0;
             left: 0;
@@ -73,43 +81,52 @@
              1280/2
              720/2
             */
+            /*
             width: 640px;
             height: 360px;
+            */
+            width: 1280px;
+            height: 720px;
+
         }
 
         #debug {
             position: fixed;
-            top: 400px;
+            bottom: 0px;
         }
 
 
         #player-list .player-status {
-            border: 1px solid white;
+            display: flex;
+            flex-direction: row;
+            border: 1px solid red;
             list-style: none;
-            margin: 0; padding: 0;
             color: white;
             background-color: red;
-            margin: 1%;
+            font-size: 140%;
         }
         .player-status .player-name {
-            display: inline-block;
-            border: 0px solid black;
-            width: 20%;
+            border: 1px solid black;
+            background-color: aqua;
+            flex: 0;
+            min-width: 20%;
+            text-align: center;
+            padding: 0;
+            margin: 1%;
         }
         .player-status .player-score-wrapper {
-            border: 0px solid green;
+            border: 1px solid green;
             display: inline-block;
+            background-color: white;
             padding:0;
-            width: 80%;
+            margin: 1%;
+            flex: 1;
         }
         .player-status .player-score {
             display: inline-block;
             border: 0px solid yellow;
             background-color: yellow;
             color: black;
-            padding:0;
-            margin:0;
-            width: 20%;
             text-align: right;
         }
         #player-list {
@@ -134,22 +151,16 @@ you don't count twice
 
 
 <div id="screen">
-<h1 id="title" class="indicator">MMOWAM</h1>
-<h1 id="timer" class="indicator">30</h1>
-<h2 id='players-title' class="indicator">Players</h2>
-<ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
-<h2 id="url" class="indicator">http://localhost/mmowam/player/?channel=<b id="channel-name">spicy-green-chipmunk</b></h2>
+    <h1 id="title" class="indicator">MMOWAM</h1>
+    <h1 id="timer" class="indicator">30</h1>
+<!--    <h2 id='players-title' class="indicator">Players</h2>-->
+    <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
+    <h2 id="url" class="indicator">Join at: <b>http://localhost/mmowam/player/?channel=</b><b id="channel-name">spicy-green-chipmunk</b></h2>
+    <h3 id="active-players" class="indicator">Active Players: <b id="player-count"></b></h3>
     <div id="countdown-overlay">3</div>
 </div>
 
 <div id="debug">
-<h3>player count <b id="player-count"></b></h3>
-<h4>Connection status: <b id="connection-status"></b></h4>
-
-<h2>Game status <b id="game-status"></b></h2>
-<ul>
-    <li>Random seed = <b id="random-seed">00000</b></li>
-</ul>
     <button id="start-game">Start Game</button>
 </div>
 

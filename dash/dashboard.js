@@ -128,11 +128,11 @@ function runAnimLoop() {
 
 
 function sync() {
-    syncDom(IDS.RANDOM_SEED, state.randomSeed);
+    //syncDom(IDS.RANDOM_SEED, state.randomSeed);
     syncDom(IDS.CHANNEL_NAME, state.channelName);
-    syncDom(IDS.GAME_STATUS, state.status);
+    //syncDom(IDS.GAME_STATUS, state.status);
     syncDom(IDS.PLAYER_COUNT, state.playerCount);
-    syncDom(IDS.CONNECTION_STATUS, state.connectionStatus);
+    //syncDom(IDS.CONNECTION_STATUS, state.connectionStatus);
     syncDom(IDS.ROUND_TIMER, state.timeLeft);
     syncPlayerList(IDS.PLAYER_LIST, state.playerList);
 }
