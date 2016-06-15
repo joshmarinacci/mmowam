@@ -49,6 +49,23 @@ var missedText = {
 var ctx = null;
 var canvas = null;
 
+
+var settings = processLocation();
+console.log("got the settings",settings);
+
+if(!settings.channel) {
+    styleDom("channel-panel",'visibility','visible');
+    onClick("connect-button", checkChannelName);
+}
+
+function checkChannelName() {
+    styleDom("channel-panel",'visibility','hidden');
+    var channel_name = getDom('channel-name');
+    console.log("the selected channel name is", channel_name);
+    CHANNEL_NAME = channel_name;
+    connect();
+}
+
 function convertMouseToHole(e) {
     var rect = canvas.getBoundingClientRect();
     var pt = {

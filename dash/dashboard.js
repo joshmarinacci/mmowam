@@ -39,6 +39,7 @@ var state = {
 
 function setup() {
     state.channelName = pick(COLORS)+'-'+pick(FLAVORS) + '-' + pick(ANIMALS);
+    CHANNEL_NAME = state.channelName;
     sync();
     connect();
     onClick(IDS.START_GAME,startGame);
@@ -69,22 +70,12 @@ function sync() {
     syncPlayerList(IDS.PLAYER_LIST, state.playerList);
 }
 
-function syncDom(id, value) {
-    var elem = document.getElementById(id);
-    //console.log("id = ", id, elem, value);
-    elem.innerHTML = (typeof value !== 'undefined')?value.toString():'undefined';
-}
 
 function syncPlayerList(id, value) {
     var elem = document.getElementById(id);
     elem.innerHTML = value.map(function(player) {
         return "<li>" + player.uuid + ": name = " + player.state.name + " score = " + player.state.score + "</li>"
     }).join("");
-}
-
-function onClick(id, cb) {
-    var elem = document.getElementById(id);
-    elem.addEventListener('click',cb);
 }
 
 
