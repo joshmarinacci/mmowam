@@ -8,16 +8,18 @@
         #countdown-overlay {
             visibility: hidden;
             padding: 1em;
-            left: 10%;
-            right: 10%;
-            position: fixed;
-            top: 10%;
-            bottom: 10%;
+            left: 5%;
+            right: 5%;
+            position: absolute;
+            top: 5%;
+            bottom: 5%;
             background-color: white;
             border: 5px solid black;
+            border-radius: 1em;
             
             text-align: center;
-            font-size: 500%;
+            font-size: 400%;
+            opacity: 0.9;
         }
 
         .indicator {
@@ -137,6 +139,7 @@ you don't count twice
 <h2 id='players-title' class="indicator">Players</h2>
 <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
 <h2 id="url" class="indicator">http://localhost/mmowam/player/?channel=<b id="channel-name">spicy-green-chipmunk</b></h2>
+    <div id="countdown-overlay">3</div>
 </div>
 
 <div id="debug">
@@ -154,7 +157,6 @@ you don't count twice
 
 <h2>To play, go to</h2>
 
-<div id="countdown-overlay">3</div>
 
 <script src="../common/common.js"></script>
 <script src="dashboard.js"></script>

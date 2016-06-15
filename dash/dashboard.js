@@ -98,13 +98,27 @@ function endRound() {
     console.log("the round has ended");
     state.timeLeft = 0;
     console.log("player status = ",state.playerList);
+    var winner = null;
+    state.playerList.forEach(function(player) {
+        if(!player.state.score) return;
+        if(winner == null) winner = player;
+        if(player.state.score > winner.state.score) {
+            winner = player;
+        }
+    });
+    //blink the winner text
     pubnub.publish({
         channel:CHANNEL_NAME,
         message: {
             "type":"action",
-            "action":"end",
+            "action":"end"
         }
     });
+    doAnim(
+        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value:winner.state.name+" Wins!<br/>Fatality!"},
+        { at: 0, target:'countdown-overlay', style:'visibility', value:'visible'}
+    )
+
 }
 
 function runAnimLoop() {
