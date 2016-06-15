@@ -11,6 +11,7 @@ var ANIMALS = ['bear','cat','chipmunk','dog','wolf','fox','lion','tiger','elepha
 
 var pubnub = null;
 var CHANNEL_NAME = "simple-channel";
+var ROUND_LENGTH = 10;
 
 function pick(arr) {
     return arr[Math.floor(Math.random()*arr.length)];
@@ -24,6 +25,7 @@ var IDS = {
     GAME_STATUS: "game-status",
     RANDOM_SEED: "random-seed",
     START_GAME: "start-game",
+    ROUND_TIMER: "timer",
     CONNECTION_STATUS: "connection-status"
 };
 
@@ -33,33 +35,83 @@ var state = {
     status:"no-game",
     playerCount:0,
     playerList: [],
-    connectionStatus:"not-connected"
+    connectionStatus:"not-connected",
+    timeLeft: -1,
 };
 
 
 function setup() {
     state.channelName = pick(COLORS)+'-'+pick(FLAVORS) + '-' + pick(ANIMALS);
-    CHANNEL_NAME = state.channelName;
+    //CHANNEL_NAME = state.channelName;
     sync();
     connect();
     onClick(IDS.START_GAME,startGame);
+    runAnimLoop();
 }
 
 
 function startGame() {
     state.randomSeed = Math.floor(Math.random()*10*1000);
-    sync();
+    //show overlay
+    doAnim(
+        { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML', value:"3"},
+        { at: 500,  target:'countdown-overlay', prop:'innerHTML', value:"2"},
+        { at:1000,  target:'countdown-overlay', prop:'innerHTML', value:"1"},
+        { at:1500,  target:'countdown-overlay', prop:'innerHTML', value:"Go!"},
+        { at:2000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
+        { at: 2000, fun: function() {
+            console.log("really starting now");
+            pubnub.publish({
+                channel:CHANNEL_NAME,
+                message: {
+                    "type":"action",
+                    "action":"start",
+                    "data": {
+                        "seed":state.randomSeed
+                    }
+                }
+            });
+            //countdown from 30 seconds
+            startTimer();
+            sync();
+        }}
+    );
+
+}
+
+var timer_id;
+function startTimer() {
+    state.timeLeft = ROUND_LENGTH;
+    timer_id = setInterval(function() {
+        console.log("counting down");
+        state.timeLeft--;
+        sync();
+        if(state.timeLeft < 0) {
+            clearInterval(timer_id);
+            endRound();
+        }
+    },1000);
+}
+
+function endRound() {
+    console.log("the round has ended");
+    state.timeLeft = 0;
+    console.log("player status = ",state.playerList);
     pubnub.publish({
         channel:CHANNEL_NAME,
         message: {
             "type":"action",
-            "action":"start",
-            "data": {
-                "seed":state.randomSeed
-            }
+            "action":"end",
         }
-    })
+    });
 }
+
+function runAnimLoop() {
+    updateAnims();
+    requestAnimationFrame(runAnimLoop);
+}
+
 
 function sync() {
     syncDom(IDS.RANDOM_SEED, state.randomSeed);
@@ -67,6 +119,7 @@ function sync() {
     syncDom(IDS.GAME_STATUS, state.status);
     syncDom(IDS.PLAYER_COUNT, state.playerCount);
     syncDom(IDS.CONNECTION_STATUS, state.connectionStatus);
+    syncDom(IDS.ROUND_TIMER, state.timeLeft);
     syncPlayerList(IDS.PLAYER_LIST, state.playerList);
 }
 
@@ -74,7 +127,12 @@ function sync() {
 function syncPlayerList(id, value) {
     var elem = document.getElementById(id);
     elem.innerHTML = value.map(function(player) {
-        return "<li>" + player.uuid + ": name = " + player.state.name + " score = " + player.state.score + "</li>"
+        var score = 0;
+        if(player.state.score) score = player.state.score;
+        return "<li class='player-status'>"
+            +"<span class='player-name'>" + player.state.name + "</span>"
+            +"<span class='player-score-wrapper'><span class='player-score' style='width:"+(score/10*100)+"%;'>" + player.state.score + "</span></span>"
+            +"</li>"
     }).join("");
 }
 
@@ -135,14 +193,11 @@ function setPlayerState(change) {
         state.playerList.push(obj);
         player = obj;
     }
-    console.log("keys = ",Object.keys(change.data));
     Object.keys(change.data).forEach(function(key) {
-        console.log("setting",key,'to',change.data[key]);
         player.state[key] = change.data[key];
     });
-    console.log("now player is", player, player.state);
-
 }
+
 function getPlayerList() {
     pubnub.here_now({
         channel: CHANNEL_NAME,

@@ -10,6 +10,7 @@ var tapWaitStart = -1;
 var activeHole = null;
 var inputBlocked = false;
 
+var round_in_progress = false;
 var STATES = {
     INACTIVE: 0,
     ACTIVE: 1,
@@ -27,6 +28,13 @@ for(var j=0; j<4; j++) {
             highlight: 0
         })
     }
+}
+
+function resetGrid() {
+    grid.forEach(function(cell) {
+        cell.state = STATES.INACTIVE;
+        cell.highlight = 0;
+    });
 }
 
 var radius = 40;
@@ -62,7 +70,7 @@ function checkChannelName() {
     styleDom("channel-panel",'visibility','hidden');
     var channel_name = getDom('channel-name');
     console.log("the selected channel name is", channel_name);
-    CHANNEL_NAME = channel_name;
+    //CHANNEL_NAME = channel_name;
     connect();
 }
 
@@ -107,7 +115,7 @@ function setup() {
 
 function checkInput() {
     if(tapWaitStart == -1) return;
-    if(new Date().getTime() - tapWaitStart > 3000) {
+    if(round_in_progress && new Date().getTime() - tapWaitStart > 3000) {
         console.log("it's been a second!");
         tapWaitStart = -1;
         // if not top on hole while active, and timeout, anim out, start next set of active
@@ -192,94 +200,37 @@ function calcHoleColor(hole) {
 
 function startRoundAnim() {
     console.log('startign the round ');
+    startText.text = "Tap only the RED holes";
+    score = 0;
+    missedText.text = 0;
+    resetGrid();
+    inputBlocked = false;
     //do these in parallel
     doAnim(
         { at:500,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
         { at:2000, target:startText, prop:'opacity', from:1.0, to:0, dur: 500},
-        { at:2500, fun: startActive},
-        { at: 10*1000, fun: endRound }
+        { at:2500, fun: startActive}
+        //{ at: 10*1000, fun: endRound }
     );
+    round_in_progress = true;
 }
 
-var GLOBAL_ANIMS = [];
 
 
 function endRound() {
-    console.log("the round must end now");
     tapWaitStart = -1;
     startText.text  = "Round Over";
     inputBlocked = true;
     doAnim(
         { at: 0, target: startText, prop:'opacity', from:0, to:1.0, dur: 500}
-    )
-}
-function Anim(props) {
-    this.delay = props.at;
-    if(!this.delay) this.delay = 0;
-    this.startTime = -1;
-    this.propertyName = props.prop;
-    this.target = props.target;
-    this.startValue = props.from;
-    this.endValue = props.to;
-    this.duration = props.dur;
-    this.fun = props.fun;
-    this.STATES = {
-        NOT_STARTED:0,
-        PLAYING: 1,
-        STOPPED: 2
-    };
-    this.state = this.STATES.NOT_STARTED;
-    this.start = function(time) {
-        this.startTime = time;
-        this.state = this.STATES.PLAYING;
-    };
-    this.update = function(time) {
-        var diff = time - this.startTime - this.delay;
-        if(diff < 0) return;
-        var t = diff/this.duration;
-        if(t > 1) {
-            this.finish(time);
-            return;
-        }
-        if(this.fun) {
-            //console.log("execute the function once");
-            this.fun();
-            this.state = this.STATES.STOPPED;
-            return;
-        }
-        var newValue = (this.endValue-this.startValue)*t + this.startValue;
-        //console.log(newValue);
-        this.target[this.propertyName] = newValue;
-    }
-    this.finish = function(time) {
-        this.state = this.STATES.STOPPED;
-        this.target[this.propertyName] = this.endValue;
-    }
+    );
+    round_in_progress = false;
+    activeHole = null;
+    resetGrid();
 }
 
 
 
-function updateAnims() {
-    var time = new Date().getTime();
-    //remove dead animations first w/ a filter
-    //if(anim.state == anim.STATES.STOPPED) {
-    //}
-    GLOBAL_ANIMS.forEach(function(anim) {
-        if(anim.state == anim.STATES.NOT_STARTED) {
-            //console.log("we must start it");
-            anim.start(time);
-        }
-        if(anim.state == anim.STATES.PLAYING) {
-            anim.update(time);
-        }
-    })
-}
-function doAnim() {
-    var args = Array.prototype.slice.call(arguments);
-    args.forEach(function(an) {
-        GLOBAL_ANIMS.push(new Anim(an));
-    });
-}
 
 function pickRandomHole(grid) {
     return Math.floor(Math.random()*grid.length);
@@ -343,9 +294,13 @@ function delayTime() {
     inputBlocked = true;
     tapWaitStart = -1;
     doAnim({ at: 2000, fun: function() {
-        inputBlocked = false;
-        //console.log("you can play again");
-        startActive();
+        if(round_in_progress) {
+            inputBlocked = false;
+            //console.log("you can play again");
+            startActive();
+        } else {
+            console.log("the game is over now");
+        }
     }})
 }
 function holeTap(hole) {
@@ -426,6 +381,10 @@ var ACTIONS = {
     start: function(args) {
         console.log("starting the game", args);
         startRoundAnim();
+    },
+    end: function(args) {
+        console.log("ending a round");
+        endRound();
     }
 };
 

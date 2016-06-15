@@ -4,6 +4,116 @@
     <meta charset="UTF-8">
     <title>MMOWAM Dashboard</title>
     <script type="text/javascript" src="https://cdn.pubnub.com/pubnub-3.15.1.js"></script>
+    <style type="text/css">
+        #countdown-overlay {
+            visibility: hidden;
+            padding: 1em;
+            left: 10%;
+            right: 10%;
+            position: fixed;
+            top: 10%;
+            bottom: 10%;
+            background-color: white;
+            border: 5px solid black;
+            
+            text-align: center;
+            font-size: 500%;
+        }
+
+        .indicator {
+            position: absolute;
+            border: 0px solid green;
+            color: white;
+            font-family: Arial;
+            font-weight: normal;
+            margin:0;
+            font-size: 100%;
+        }
+        #title {
+            top: 3%;
+            left: 3%;
+            font-size: 200%;
+        }
+        #timer {
+            right: 3%;
+            top: 3%;
+            font-size: 200%;
+        }
+        #players-title {
+            top: 15%;
+            left: 3%;
+        }
+
+        #player-list {
+            position: absolute;
+            top: 20%;
+            left: 3%;
+            right: 3%;
+            bottom: 10%;
+            border: 5px solid black;
+        }
+
+        #url {
+            bottom: 3%;
+            left: 3%;
+        }
+
+
+        #screen {
+            position: fixed;
+            border: 5px solid red;
+            background-color: blue;
+            padding: 0;
+            margin: 0;
+            left: 0;
+            top: 0;
+            /*
+             1280/2
+             720/2
+            */
+            width: 640px;
+            height: 360px;
+        }
+
+        #debug {
+            position: fixed;
+            top: 400px;
+        }
+
+
+        #player-list .player-status {
+            border: 1px solid white;
+            list-style: none;
+            margin: 0; padding: 0;
+            color: white;
+            background-color: red;
+            margin: 1%;
+        }
+        .player-status .player-name {
+            display: inline-block;
+            border: 0px solid black;
+            width: 20%;
+        }
+        .player-status .player-score-wrapper {
+            border: 0px solid green;
+            display: inline-block;
+            padding:0;
+            width: 80%;
+        }
+        .player-status .player-score {
+            display: inline-block;
+            border: 0px solid yellow;
+            background-color: yellow;
+            color: black;
+            padding:0;
+            margin:0;
+            width: 20%;
+            text-align: right;
+        }
+        #player-list {
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
 
@@ -13,20 +123,23 @@
 //realtime update of how many people are connected
 //when push button, start the game
 
-indicate on dashboard when the game starts
-pass scores back to the dashboard and update display
-
+//indicate on dashboard when the game starts
+//pass scores back to the dashboard and update display
 
 set UUID permanently in a cookie or local storage so if you hit reload
 you don't count twice
 -->
 
 
-<h1>MMOWAM</h1>
-<h2>To play, go to</h2>
-<h2>http://localhost/mmowam/player/?channel=<b id="channel-name">spicy-green-chipmunk</b></h2>
-<h2>Players</h2>
+<div id="screen">
+<h1 id="title" class="indicator">MMOWAM</h1>
+<h1 id="timer" class="indicator">30</h1>
+<h2 id='players-title' class="indicator">Players</h2>
 <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
+<h2 id="url" class="indicator">http://localhost/mmowam/player/?channel=<b id="channel-name">spicy-green-chipmunk</b></h2>
+</div>
+
+<div id="debug">
 <h3>player count <b id="player-count"></b></h3>
 <h4>Connection status: <b id="connection-status"></b></h4>
 
@@ -34,8 +147,14 @@ you don't count twice
 <ul>
     <li>Random seed = <b id="random-seed">00000</b></li>
 </ul>
+    <button id="start-game">Start Game</button>
+</div>
 
-<button id="start-game">Start Game</button>
+
+
+<h2>To play, go to</h2>
+
+<div id="countdown-overlay">3</div>
 
 <script src="../common/common.js"></script>
 <script src="dashboard.js"></script>
