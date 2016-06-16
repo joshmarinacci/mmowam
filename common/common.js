@@ -2,9 +2,6 @@
  * Created by josh on 6/14/16.
  */
 
-console.log("loading common.js");
-
-
 function pick(arr) {
     return arr[Math.floor(Math.random()*arr.length)];
 }

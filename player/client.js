@@ -68,10 +68,6 @@ var canvas = null;
 var settings = processLocation();
 console.log("got the settings",settings);
 
-if(!settings.channel) {
-    styleDom("channel-panel",'visibility','visible');
-    onClick("connect-button", checkChannelName);
-}
 
 function checkChannelName() {
     styleDom("channel-panel",'visibility','hidden');
@@ -94,6 +90,25 @@ function convertMouseToHole(e) {
     return hole;
 }
 
+function calculateUUID() {
+    if(settings.uuid) return settings.uuid;
+    var key = 'mmowam-player-uuid';
+    if(!sessionStorage.getItem(key)) sessionStorage.setItem(key, PUBNUB.uuid());
+    return sessionStorage.getItem(key);
+}
+
+function calculateIcon() {
+    var key = 'mmowam-player-icon';
+    if(!sessionStorage.getItem(key)) sessionStorage.setItem(key, pick(ICONS));
+    return sessionStorage.getItem(key);
+}
+
+function calculateAdjective() {
+    var key = 'mmowam-player-adjective';
+    if(!sessionStorage.getItem(key)) sessionStorage.setItem(key, pick(ADJECTIVES));
+    return sessionStorage.getItem(key);
+}
+
 function setup() {
     canvas = document.getElementById('canvas');
     canvas.addEventListener("mousedown", function(e) {
@@ -114,13 +129,19 @@ function setup() {
     ctx = canvas.getContext('2d');
 
     drawScreen();
-    playerState.adjective = pick(ADJECTIVES);
-    playerState.icon = pick(ICONS);
+    playerState.adjective = calculateAdjective();
+    playerState.icon = calculateIcon();
+    playerState.uuid = calculateUUID();
     img.src = "../images/sqr/"+playerState.icon+".png";
 
     //startRoundAnim();
 
-    connect();
+    if(!settings.channel) {
+        styleDom("channel-panel",'visibility','visible');
+        onClick("connect-button", checkChannelName);
+    } else {
+        connect();
+    }
 }
 
 function checkInput() {
@@ -267,6 +288,7 @@ function animHoleGood(hole) {
 }
 
 function updateState() {
+    console.log("sending state", playerState)
     pubnub.state({
         channel:CHANNEL_NAME,
         state: playerState
@@ -335,18 +357,13 @@ function holeTap(hole) {
 }
 
 function connect() {
-    console.log("connecting to pubnub");
-    var uuid = 'billy';
-    if(settings.uuid) {
-        uuid = settings.uuid;
-    }
     pubnub = PUBNUB({
         publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
         subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
         error: function(err) {
             console.log("error",err);
         },
-        uuid:uuid
+        uuid:playerState.uuid
     });
 
     pubnub.subscribe({
@@ -368,11 +385,15 @@ function connect() {
         }
     });
 
-    playerState.name = uuid;
+    playerState.name = playerState.uuid
     updateState();
 }
 
 var ACTIONS = {
+    countdown: function(args) {
+        console.log("starting the countdown");
+        startCountdown();
+    },
     start: function(args) {
         console.log("starting the game", args);
         startRoundAnim();
