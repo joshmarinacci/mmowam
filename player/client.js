@@ -6,6 +6,10 @@
 var pubnub = null;
 var CHANNEL_NAME = "simple-channel";
 
+var ICONS = ['elephant','giraffe','hippo','monkey','panda','parrot','penguin','pig','rabbit','snake'];
+var ADJECTIVES = ['Saucy',"Sweet","Snarky",'Silly','Sassy'];
+
+
 var tapWaitStart = -1;
 var activeHole = null;
 var inputBlocked = false;
@@ -51,9 +55,9 @@ var startText = {
     opacity: 0.0
 };
 
-var missedText = {
-    text:0,
-    fill: 'black',
+var img = new Image();
+var avatar = {
+    img: img,
     opacity: 1.0
 };
 
@@ -110,6 +114,9 @@ function setup() {
     ctx = canvas.getContext('2d');
 
     drawScreen();
+    playerState.adjective = pick(ADJECTIVES);
+    playerState.icon = pick(ICONS);
+    img.src = "../images/sqr/"+playerState.icon+".png";
 
     //startRoundAnim();
 
@@ -125,7 +132,7 @@ function checkInput() {
         //anim out the hole
         //paralyze for 2 seconds
         console.log("you must wait to seconds");
-        missedText.text += 1;
+        //avatar.text += 1;
         delayTime();
         //inputBlocked = true;
         doAnim(
@@ -157,20 +164,29 @@ function drawOverlayText() {
     ctx.save();
     ctx.fillStyle = startText.fill;
     ctx.globalAlpha = startText.opacity;
-    ctx.font = '20pt Arial';
+    ctx.font = '20pt Scope One';
     ctx.fillText(startText.text,50,100);
     ctx.restore();
 
     ctx.save();
-    ctx.font = '50pt Arial';
+    ctx.font = '80pt Scope One';
     ctx.fillStyle = "#33aa88";
-    ctx.fillText(""+playerState.score, 30, 70);
+    ctx.fillText(""+playerState.score, 20, 120);
     ctx.restore();
 
     ctx.save();
-    ctx.font = '50pt Arial';
+    ctx.font = '26pt Bungee Shade';
     ctx.fillStyle = "#33aa88";
-    ctx.fillText(""+missedText.text, 300, 70);
+    ctx.fillText("MMOWAM", 90, 70);
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(400-80-20,20);
+    ctx.drawImage(avatar.img, 0, 20, 80, 80);
+    ctx.font = '18pt Scope One';
+    ctx.fillStyle = "#33aa88";
+    ctx.fillText(""+playerState.adjective,  0, 120);
+    ctx.fillText(""+playerState.icon,       0, 140);
     ctx.restore();
 }
 
@@ -196,7 +212,7 @@ function startRoundAnim() {
     console.log('startign the round ');
     startText.text = "Tap only the RED holes";
     playerState.score = 0;
-    missedText.text = 0;
+    //avatar.text = 0;
     resetGrid();
     inputBlocked = false;
     //do these in parallel
@@ -265,7 +281,7 @@ function playGoodSound() {
     //noop
 }
 function incrementBadTap() {
-    missedText.text += 1;
+    //avatar.text += 1;
 }
 function animHoleBad(hole) {
     doAnim(

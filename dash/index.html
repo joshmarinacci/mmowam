@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <title>MMOWAM Dashboard</title>
     <script type="text/javascript" src="https://cdn.pubnub.com/pubnub-3.15.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Bungee|Bungee+Shade|Rubik+One|Gruppo|Scope+One" rel="stylesheet">
+
+
     <style type="text/css">
         html, body {
             font-size: 24pt;
+        }
+        h1 {
+            font-family: 'Bungee Shade', cursive;
         }
         #countdown-overlay {
             visibility: hidden;
@@ -20,6 +26,8 @@
             border: 5px solid black;
             border-radius: 1em;
             text-align: center;
+            text-transform: capitalize;
+            font-family: 'Scope One', sans-serif;
             font-size: 400%;
             opacity: 0.9;
         }
@@ -28,7 +36,6 @@
             position: absolute;
             border: 0px solid green;
             color: white;
-            font-family: Arial;
             font-weight: normal;
             margin:0;
             font-size: 100%;
@@ -56,6 +63,7 @@
             bottom: 15%;
             border: 5px solid black;
             background-color: greenyellow;
+            overflow-y: scroll;;
         }
 
         #active-players {
@@ -106,13 +114,24 @@
             font-size: 140%;
         }
         .player-status .player-name {
-            border: 1px solid black;
-            background-color: aqua;
+            border: 0px solid black;
+            background-color: white;
             flex: 0;
             min-width: 20%;
-            text-align: center;
+            text-align: right;
             padding: 0;
+            padding-right: 1em;
+            text-transform: capitalize;
             margin: 1%;
+            font-size: 60%;
+            font-family: 'Rubik One', sans-serif;
+            font-weight: normal;
+            color: black;
+        }
+        .player-status .player-icon {
+            border: 0px solid blue;
+            margin: 1%;
+            height: 1.3em;
         }
         .player-status .player-score-wrapper {
             border: 1px solid green;
@@ -121,6 +140,8 @@
             padding:0;
             margin: 1%;
             flex: 1;
+            font-size: 100%;
+            font-family: 'Rubik One', sans-serif;
         }
         .player-status .player-score {
             display: inline-block;
@@ -131,6 +152,12 @@
         }
         #player-list {
             padding: 0;
+        }
+
+        #url, #active-players {
+            font-family: 'Helvetica', sans-serif;
+            font-weight: normal;
+            font-family: 'Scope One';
         }
     </style>
 </head>
@@ -155,8 +182,8 @@ you don't count twice
     <h1 id="timer" class="indicator">30</h1>
 <!--    <h2 id='players-title' class="indicator">Players</h2>-->
     <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
-    <h2 id="url" class="indicator">Join at: <b>http://localhost/mmowam/player/?channel=</b><b id="channel-name">spicy-green-chipmunk</b></h2>
-    <h3 id="active-players" class="indicator">Active Players: <b id="player-count"></b></h3>
+    <h2 id="url" class="indicator">Join at: <span>http://localhost/mmowam/player/?channel=</span><span id="channel-name">spicy-green-chipmunk</span></h2>
+    <h3 id="active-players" class="indicator">Active Players: <span id="player-count"></span></h3>
     <div id="countdown-overlay">3</div>
 </div>
 

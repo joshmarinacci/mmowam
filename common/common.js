@@ -5,6 +5,10 @@
 console.log("loading common.js");
 
 
+function pick(arr) {
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
 function onClick(id, cb) {
     var elem = document.getElementById(id);
     elem.addEventListener('click',cb);

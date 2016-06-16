@@ -13,9 +13,6 @@ var pubnub = null;
 var CHANNEL_NAME = "simple-channel";
 var ROUND_LENGTH = 10;
 
-function pick(arr) {
-    return arr[Math.floor(Math.random()*arr.length)];
-}
 
 
 var IDS = {
@@ -95,9 +92,7 @@ function startTimer() {
 }
 
 function endRound() {
-    console.log("the round has ended");
     state.timeLeft = 0;
-    console.log("player status = ",state.playerList);
     var winner = null;
     state.playerList.forEach(function(player) {
         if(!player.state.score) return;
@@ -115,7 +110,7 @@ function endRound() {
         }
     });
     doAnim(
-        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value:winner.state.name+" Wins!<br/>Fatality!"},
+        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value:winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!"},
         { at: 0, target:'countdown-overlay', style:'visibility', value:'visible'}
     )
 
@@ -140,11 +135,27 @@ function sync() {
 
 function syncPlayerList(id, value) {
     var elem = document.getElementById(id);
-    elem.innerHTML = value.map(function(player) {
+    var arr = value.slice();
+    arr.sort(function(a,b){
+        if(a.state.score < b.state.score) {
+            return 1;
+        } else {
+            return -1;
+        }
+    });
+    elem.innerHTML = arr.map(function(player) {
         var score = 0;
         if(player.state.score) score = player.state.score;
+        var icon = 'elephant';
+        var adjective = 'saucy';
+        if(player.state.icon) icon = player.state.icon;
+        if(player.state.adjective) adjective = player.state.adjective;
+
+        var img = "../images/sqr/"+icon+".png";
+        var name = adjective + " " + icon;
         return "<li class='player-status'>"
-            +"<span class='player-name'>" + player.state.name + "</span>"
+            +"<span class='player-name'>" + name + "</span>"
+            +"<img  class='player-icon' src='"+img+"' />"
             +"<span class='player-score-wrapper'><span class='player-score' style='width:"+(score/10*100)+"%;'>" + player.state.score + "</span></span>"
             +"</li>"
     }).join("");
