@@ -5,6 +5,7 @@
 
 console.log("loading the dashboard");
 
+var BASE_URL = "http://localhost/mmowam/player/?channel=";
 var COLORS = ["red","green","blue","orange","black","white","purple",'brown','gray'];
 var FLAVORS = ["salty",'sweet','spicy','tangy','sour','bland'];
 var ANIMALS = ['bear','cat','chipmunk','dog','wolf','fox','lion','tiger','elephant'];
@@ -39,7 +40,13 @@ var state = {
 
 function setup() {
     state.channelName = pick(COLORS)+'-'+pick(FLAVORS) + '-' + pick(ANIMALS);
-    //CHANNEL_NAME = state.channelName;
+    new QRCode(document.getElementById("qrcode"), {
+        width: 128,
+        height: 128,
+        colorDark : "#444400",
+        colorLight : "#ffff00",
+        text:BASE_URL+state.channelName
+    });
     sync();
     connect();
     onClick(IDS.START_GAME,startGame);
@@ -133,7 +140,7 @@ function runAnimLoop() {
 
 function sync() {
     //syncDom(IDS.RANDOM_SEED, state.randomSeed);
-    syncDom(IDS.CHANNEL_NAME, state.channelName);
+    syncDom(IDS.CHANNEL_NAME, BASE_URL + state.channelName);
     //syncDom(IDS.GAME_STATUS, state.status);
     syncDom(IDS.PLAYER_COUNT, state.playerCount);
     //syncDom(IDS.CONNECTION_STATUS, state.connectionStatus);

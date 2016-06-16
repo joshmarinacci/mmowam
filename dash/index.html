@@ -159,6 +159,12 @@
             font-weight: normal;
             font-family: 'Scope One';
         }
+
+        #qrcode {
+            position: absolute;
+            bottom: 1%;
+            right: 1%;
+        }
     </style>
 </head>
 <body>
@@ -182,8 +188,9 @@ you don't count twice
     <h1 id="timer" class="indicator">30</h1>
 <!--    <h2 id='players-title' class="indicator">Players</h2>-->
     <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
-    <h2 id="url" class="indicator">Join at: <span>http://localhost/mmowam/player/?channel=</span><span id="channel-name">spicy-green-chipmunk</span></h2>
+    <h2 id="url" class="indicator">Join at: <span id="channel-name">spicy-green-chipmunk</span></h2>
     <h3 id="active-players" class="indicator">Active Players: <span id="player-count"></span></h3>
+    <div id="qrcode"></div>
     <div id="countdown-overlay">3</div>
 </div>
 
@@ -197,7 +204,10 @@ you don't count twice
 
 
 <script src="../common/common.js"></script>
+<script src="../common/qrcode.js"></script>
 <script src="dashboard.js"></script>
+
+
 
 </body>
 </html>
