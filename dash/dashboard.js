@@ -5,7 +5,7 @@
 
 console.log("loading the dashboard");
 
-var BASE_URL = "http://localhost/mmowam/player/?channel=";
+var BASE_URL = "http://joshondesign.com/p/apps/mmowam/player/?channel=";
 var COLORS = ["red","green","blue","orange","black","white","purple",'brown','gray'];
 var FLAVORS = ["salty",'sweet','spicy','tangy','sour','bland'];
 var ANIMALS = ['bear','cat','chipmunk','dog','wolf','fox','lion','tiger','elephant'];
