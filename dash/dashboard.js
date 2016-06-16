@@ -51,6 +51,15 @@ function startGame() {
     state.randomSeed = Math.floor(Math.random()*10*1000);
     //show overlay
     doAnim(
+        { at:   0,  fun: function() {
+            pubnub.publish({
+                channel:CHANNEL_NAME,
+                message: {
+                    "type":"action",
+                    "action":"countdown",
+                }
+            });
+        }},
         { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
         { at:   0,  target:'countdown-overlay', prop:'innerHTML', value:"3"},
         { at: 500,  target:'countdown-overlay', prop:'innerHTML', value:"2"},

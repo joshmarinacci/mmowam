@@ -134,7 +134,6 @@ function setup() {
     playerState.uuid = calculateUUID();
     img.src = "../images/sqr/"+playerState.icon+".png";
 
-    //startRoundAnim();
 
     if(!settings.channel) {
         styleDom("channel-panel",'visibility','visible');
@@ -186,7 +185,7 @@ function drawOverlayText() {
     ctx.fillStyle = startText.fill;
     ctx.globalAlpha = startText.opacity;
     ctx.font = '20pt Scope One';
-    ctx.fillText(startText.text,50,100);
+    ctx.fillText(startText.text,50,200);
     ctx.restore();
 
     ctx.save();
@@ -227,6 +226,21 @@ function drawGrid(grid) {
 function calcHoleColor(hole) {
     if(hole.state == STATES.INACTIVE) return "black";
     if(hole.state == STATES.ACTIVE)   return 'rgba('+Math.floor(hole.highlight*255)+',0,0,1)';
+}
+
+function startCountdown() {
+    doAnim(
+        { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML', value:"3"},
+        { at: 500,  target:'countdown-overlay', prop:'innerHTML', value:"2"},
+        { at:1000,  target:'countdown-overlay', prop:'innerHTML', value:"1"},
+        { at:1500,  target:'countdown-overlay', prop:'innerHTML', value:"Go!"},
+        { at:2000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
+        { at: 2000, fun: function() {
+            console.log("really starting now");
+            startRoundAnim();
+        }}
+    );
 }
 
 function startRoundAnim() {
@@ -355,6 +369,7 @@ function holeTap(hole) {
         return;
     }
 }
+
 
 function connect() {
     pubnub = PUBNUB({

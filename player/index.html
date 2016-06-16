@@ -13,8 +13,11 @@
         #channel-panel {
             visibility: hidden;
             padding: 1em;
-            position: fixed;
-            top: 5em;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            right: 5%;
+            bottom: 5%;
             background-color: white;
             border: 5px solid black;
         }
@@ -23,15 +26,48 @@
             font-size: 200%;
             text-align: center;
         }
+        #countdown-overlay {
+            top: 5%;
+            left: 5%;
+            right: 5%;
+            bottom: 5%;
+            visibility: hidden;
+            padding: 1em;
+            position: absolute;
+            background-color: white;
+            border: 5px solid black;
+            border-radius: 1em;
+            text-align: center;
+            text-transform: capitalize;
+            font-family: 'Scope One', sans-serif;
+            font-size: 400%;
+            opacity: 0.9;
+        }
+
+        #screen {
+            position: fixed;
+            border: 0px solid red;
+            background-color: yellowgreen;
+            padding: 0;
+            margin: 0;
+            left: 0;
+            top: 0;
+            width: 400px;
+            height: 600px;
+        }
+
     </style>
 </head>
 <body>
-<div id="channel-panel">
-    <h1>Enter a Channel Name</h1>
-    <input type="text" id="channel-name"/>
-    <button id="connect-button">connect</button>
+<div id="screen">
+    <div id="channel-panel">
+        <h1>Enter a Channel Name</h1>
+        <input type="text" id="channel-name"/>
+        <button id="connect-button">connect</button>
+    </div>
+    <div id="countdown-overlay">3</div>
+    <canvas width="400" height="600" id="canvas"></canvas>
 </div>
-<canvas width="400" height="600" id="canvas"></canvas>
 <script src="../common/common.js"></script>
 <script src="client.js"></script>
 </body>
