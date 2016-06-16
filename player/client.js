@@ -290,9 +290,14 @@ function startActive() {
 
     tapWaitStart = new Date().getTime();
 
-    //anim active holes in
-    // if tap on hole while active, anim out, start next set of active
-    // if tap on wrong hole, anim out, wait N seconds, start next set of active
+    if(settings.auto == 'true') {
+        doAnim({
+            at: 500, fun: function() {
+                console.log("doing auto");
+                holeTap(activeHole);
+            }
+        })
+    }
 }
 
 function animHoleGood(hole) {
