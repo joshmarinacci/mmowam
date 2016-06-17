@@ -59,6 +59,7 @@ function startGame() {
     //show overlay
     doAnim(
         { at:   0,  fun: function() {
+            console.log("starting with the channel name", CHANNEL_NAME);
             pubnub.publish({
                 channel:CHANNEL_NAME,
                 message: {
@@ -126,7 +127,7 @@ function endRound() {
         }
     });
     doAnim(
-        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value:winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!"},
+        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value: "<b>"+winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!</b>"},
         { at: 0, target:'countdown-overlay', style:'visibility', value:'visible'}
     )
 
@@ -195,7 +196,7 @@ function connect() {
             //console.log("got a message",msg,env,chan);
         },
         connect: function() {
-            console.log("connected to pubnub");
+            console.log("connected to pubnub on channel", CHANNEL_NAME);
             state.connectionStatus = "connected";
             sync();
             getPlayerList();
