@@ -61,6 +61,10 @@ var startText = {
 };
 
 var img = new Image();
+img.loaded = false;
+img.onload = function() {
+    img.loaded = true;
+}
 var avatar = {
     img: img,
     opacity: 1.0
@@ -119,18 +123,27 @@ function calculateAdjective() {
     return sessionStorage.getItem(key);
 }
 
+function handleInput(e) {
+    if(inputBlocked === true) {
+        console.log("you must wait!");
+        return;
+    }
+    var hole = convertMouseToHole(e);
+    if(hole != null){
+        console.log("tapped on a hole", hole);
+        holeTap(hole);
+    }
+}
 function setup() {
     canvas = document.getElementById('canvas');
+    /*
+    canvas.addEventListener("touchstart", function(e) {
+        console.log("touch started",e);
+        handleInput(e);
+    });
+    */
     canvas.addEventListener("mousedown", function(e) {
-        if(inputBlocked === true) {
-            console.log("you must wait!");
-            return;
-        }
-        var hole = convertMouseToHole(e);
-        if(hole != null){
-            console.log("tapped on a hole");
-            holeTap(hole);
-        }
+        handleInput(e);
     });
     canvas.addEventListener("mouseup", function(e) {
         //console.log("mouse up");
@@ -219,7 +232,8 @@ function drawOverlayText(ctx) {
 
     ctx.save();
     ctx.translate(400-80-20,50);
-    ctx.drawImage(avatar.img, 0, 20, 80, 80);
+    //console.log("img = ", avatar.img.complete);
+    if(img.loaded) ctx.drawImage(avatar.img, 0, 20, 80, 80);
     ctx.font = '18pt Scope One';
     ctx.fillStyle = "#33aa88";
     ctx.fillText(""+playerState.adjective,  -100, 60);
@@ -278,9 +292,9 @@ function startRoundAnim() {
     inputBlocked = false;
     //do these in parallel
     doAnim(
-        { at:500,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
+        { at:0,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
         { at:2000, target:startText, prop:'opacity', from:1.0, to:0, dur: 500},
-        { at:2500, fun: startActive}
+        { at:0, fun: startActive}
         //{ at: 10*1000, fun: endRound }
     );
     round_in_progress = true;
@@ -421,7 +435,7 @@ function connect() {
             }
         },
         connect: function() {
-            console.log("connected to pubnub");
+            console.log("connected to pubnub with channel", CHANNEL_NAME);
             //state.connectionStatus = "connected";
         },
         disconnect: function() {
