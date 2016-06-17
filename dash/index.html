@@ -8,114 +8,112 @@
 
 
     <style type="text/css">
-        html, body {
-            font-size: 24pt;
-        }
         h1 {
             font-family: 'Bungee Shade', cursive;
         }
+        html, body {
+            font-size: 24pt;
+            padding: 0;
+            margin:0;
+        }
+
+        #screen-wrapper {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border: 0px solid red;
+            background-color: yellowgreen;
+        }
+
+        #screen {
+            border: 0px solid green;
+            /* 16x10 = */
+            width: 160vmin;
+            height: 100vmin;
+            background-color: yellowgreen;
+            font-size: 1vmin;
+            position: relative;
+        }
+
+
+        #title { font-size: 500%; top: 0em; left: 1em;   }
+        #timer { font-size: 500%; top: 0em; right: 1em;  }
+
+        #active-players {  bottom: 2.0em;  left: 1em;   font-size: 300%; }
+        #url {             bottom: 0.5em;  left: 1em;   font-size: 300%; }
+        #qrcode {          position: absolute;  bottom: 1em;  right: 1em;  }
+        .indicator {       position: absolute;   color: white;    }
+
+        #url, #active-players {
+            font-weight: normal;
+            font-family: 'Scope One', sans-serif;
+        }
+
+
         #countdown-overlay {
             visibility: hidden;
-            padding: 1em;
-            left: 5%;
-            right: 5%;
+            padding: 0em;
+            left: 1em;
+            right: 1em;
             position: absolute;
-            top: 5%;
-            bottom: 5%;
+            top: 5em;
+            bottom: 7.5em;
             background-color: white;
             border: 5px solid black;
             border-radius: 1em;
             text-align: center;
             text-transform: capitalize;
             font-family: 'Scope One', sans-serif;
-            font-size: 400%;
+            font-size: 200%;
             opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .indicator {
-            position: absolute;
-            border: 0px solid green;
-            color: white;
-            font-weight: normal;
-            margin:0;
-            font-size: 100%;
-        }
-        #title {
-            top: 3%;
-            left: 3%;
-            font-size: 200%;
-        }
-        #timer {
-            right: 3%;
-            top: 3%;
-            font-size: 200%;
-        }
-        #players-title {
-            top: 15%;
-            left: 3%;
+        #countdown-overlay b {
+            font-size: 1000%;
+            border: 0px solid red;
         }
 
         #player-list {
             position: absolute;
-            top: 15%;
-            left: 3%;
-            right: 3%;
-            bottom: 15%;
+            top: 10em;
+            left: 3em;
+            right: 3em;
+            bottom: 15em;
             border: 5px solid black;
+            border-radius: 1em;
             background-color: greenyellow;
             overflow-y: scroll;;
         }
 
-        #active-players {
-            bottom: 8%;
-            left: 3%;
-        }
-
-        #url {
-            bottom: 2%;
-            left: 3%;
-            font-size: 80%;
-        }
 
 
-        #screen {
-            position: fixed;
-            border: 0px solid red;
-            background-color: yellowgreen;
-            padding: 0;
-            margin: 0;
-            left: 0;
-            top: 0;
-            /*
-             1280/2
-             720/2
-            */
-            /*
-            width: 640px;
-            height: 360px;
-            */
-            width: 1280px;
-            height: 720px;
-
-        }
 
         #debug {
             position: fixed;
             bottom: 0px;
         }
 
-
         #player-list .player-status {
             display: flex;
             flex-direction: row;
-            border: 1px solid red;
+            border: 0px solid red;
             list-style: none;
             color: white;
-            background-color: red;
-            font-size: 140%;
+            background-color: transparent;
+            font-size: 5em;
+            height: 2em;
+            padding: 0.2em;
         }
+
         .player-status .player-name {
-            border: 0px solid black;
+            display: inline-block;
+            border: 0.1em solid gray;
+            border-radius: 0.15em;
             background-color: white;
             flex: 0;
             min-width: 20%;
@@ -123,49 +121,42 @@
             padding: 0;
             padding-right: 1em;
             text-transform: capitalize;
-            margin: 1%;
-            font-size: 60%;
             font-family: 'Rubik One', sans-serif;
             font-weight: normal;
+            font-size: 60%;
             color: black;
+            margin: 0em;
         }
         .player-status .player-icon {
-            border: 0px solid blue;
-            margin: 1%;
-            height: 1.3em;
+            border: 0px solid black;
+            margin: 0em;
+            padding: 0 0.2em;
+            height: 2em;
+            align-self: center;
+            width: auto;
         }
         .player-status .player-score-wrapper {
-            border: 1px solid green;
+            border: 0.1em solid gray;
+            border-radius: 0.15em;
             display: inline-block;
             background-color: white;
             padding:0;
-            margin: 1%;
+            margin: 0;
             flex: 1;
-            font-size: 100%;
-            font-family: 'Rubik One', sans-serif;
         }
         .player-status .player-score {
             display: inline-block;
-            border: 0px solid yellow;
+            border: 1px solid black;
             background-color: yellow;
             color: black;
             text-align: right;
+            font-family: 'Rubik One', sans-serif;
+            height: 100%;
         }
         #player-list {
             padding: 0;
         }
 
-        #url, #active-players {
-            font-family: 'Helvetica', sans-serif;
-            font-weight: normal;
-            font-family: 'Scope One';
-        }
-
-        #qrcode {
-            position: absolute;
-            bottom: 1%;
-            right: 1%;
-        }
     </style>
 </head>
 <body>
@@ -184,25 +175,21 @@ you don't count twice
 -->
 
 
-<div id="screen">
-    <h1 id="title" class="indicator">MMOWAM</h1>
-    <h1 id="timer" class="indicator">30</h1>
-<!--    <h2 id='players-title' class="indicator">Players</h2>-->
-    <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
-    <h2 id="url" class="indicator">Join at: <span id="channel-name">spicy-green-chipmunk</span></h2>
-    <h3 id="active-players" class="indicator">Active Players: <span id="player-count"></span></h3>
-    <div id="qrcode"></div>
-    <div id="countdown-overlay">3</div>
+<div id="screen-wrapper">
+    <div id="screen">
+        <h1 id="title" class="indicator">MMOWAM</h1>
+        <h1 id="timer" class="indicator">30</h1>
+        <ul id="player-list"><li>player 1</li><li>player 2</li><li>player 3</li></ul>
+        <h2 id="url" class="indicator">Join at: <span id="channel-name">spicy-green-chipmunk</span></h2>
+        <h2 id="active-players" class="indicator">Active Players: <span id="player-count"></span></h2>
+        <div id="qrcode"></div>
+        <div id="countdown-overlay"><b>overlay text</b></div>
+    </div>
 </div>
 
 <div id="debug">
     <button id="start-game">Start Game</button>
 </div>
-
-
-
-<h2>To play, go to</h2>
-
 
 <script src="../common/common.js"></script>
 <script src="../common/qrcode.js"></script>
