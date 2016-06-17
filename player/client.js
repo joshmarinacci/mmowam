@@ -45,9 +45,14 @@ function resetGrid() {
     });
 }
 
-var radius = 40;
+var radius = 45;
 var xoff = 0;
-var yoff = 200;
+var yoff = 215;
+var canvasXoff = 0;
+var gridSpacing = 95;
+var canvasScale = 1.5;
+var idealWidth = 400;
+var idealHeight = 600;
 
 var startText = {
     text : "Tap only the RED holes",
@@ -79,14 +84,19 @@ function checkChannelName() {
 
 function convertMouseToHole(e) {
     var rect = canvas.getBoundingClientRect();
-    var pt = {
-        x: Math.floor((e.clientX - rect.left - xoff)/100),
-        y: Math.floor((e.clientY - rect.top - yoff)/100)
+    var pt1 = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+    var pt2 = { x: pt1.x/canvasScale, y: pt1.y/canvasScale};
+    var pt3 = {
+        x: Math.floor((pt2.x - xoff)/gridSpacing),
+        y: Math.floor((pt2.y - yoff)/gridSpacing)
     };
 
-    if(pt.x < 0 || pt.x >= 4) return null;
-    if(pt.y < 0 || pt.y >= 4) return null;
-    var hole = grid[pt.x+pt.y*4];
+    if(pt3.x < 0 || pt3.x >= 4) return null;
+    if(pt3.y < 0 || pt3.y >= 4) return null;
+    var hole = grid[pt3.x+pt3.y*4];
     return hole;
 }
 
@@ -116,7 +126,6 @@ function setup() {
             console.log("you must wait!");
             return;
         }
-        //console.log("mouse down");
         var hole = convertMouseToHole(e);
         if(hole != null){
             console.log("tapped on a hole");
@@ -163,24 +172,61 @@ function checkInput() {
 }
 
 function drawScreen() {
+    var rect = canvas.getBoundingClientRect();
+    var err = Math.abs(canvas.width - rect.width);
+    if(err > 2) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        var sc = canvas.width/idealWidth;
+        var sc2 = canvas.height/idealHeight;
+        canvasScale = Math.min(sc,sc2);
+    }
+
     checkInput();
     updateAnims();
-    clearScreen();
-    drawGrid(grid);
-    drawOverlayText();
+
+    var ctx = canvas.getContext('2d');
+    ctx.save();
+    canvasXoff = canvas.width - idealWidth*canvasScale;
+    //ctx.translate(canvasXoff/2-10,0);
+    ctx.scale(canvasScale,canvasScale);
+    clearScreen(ctx);
+    drawGrid(grid,ctx);
+    drawOverlayText(ctx);
+    ctx.restore();
     requestAnimationFrame(drawScreen);
 }
 
-function clearScreen() {
-    var dim = {
-        w: canvas.width,
-        h: canvas.height
-    };
-    ctx.fillStyle = "#f0f0f0";
-    ctx.fillRect(0,0,dim.w,dim.h);
+function clearScreen(ctx) {
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(0,0,idealWidth,idealHeight);
 }
 
-function drawOverlayText() {
+function drawOverlayText(ctx) {
+    ctx.save();
+    ctx.font = '40pt Bungee Shade';
+    ctx.fillStyle = "#33aa88";
+    ctx.fillText("MMOWAM", 60, 50);
+    ctx.restore();
+
+
+    ctx.save();
+    ctx.font = '90pt Scope One';
+    ctx.fillStyle = "#33aa88";
+    ctx.fillText(""+playerState.score, 20, 150);
+    ctx.restore();
+
+
+    ctx.save();
+    ctx.translate(400-80-20,50);
+    ctx.drawImage(avatar.img, 0, 20, 80, 80);
+    ctx.font = '18pt Scope One';
+    ctx.fillStyle = "#33aa88";
+    ctx.fillText(""+playerState.adjective,  -100, 60);
+    ctx.fillText(""+playerState.icon,       -100, 80);
+    ctx.restore();
+
+
     ctx.save();
     ctx.fillStyle = startText.fill;
     ctx.globalAlpha = startText.opacity;
@@ -188,32 +234,12 @@ function drawOverlayText() {
     ctx.fillText(startText.text,50,200);
     ctx.restore();
 
-    ctx.save();
-    ctx.font = '80pt Scope One';
-    ctx.fillStyle = "#33aa88";
-    ctx.fillText(""+playerState.score, 20, 120);
-    ctx.restore();
-
-    ctx.save();
-    ctx.font = '26pt Bungee Shade';
-    ctx.fillStyle = "#33aa88";
-    ctx.fillText("MMOWAM", 90, 70);
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(400-80-20,20);
-    ctx.drawImage(avatar.img, 0, 20, 80, 80);
-    ctx.font = '18pt Scope One';
-    ctx.fillStyle = "#33aa88";
-    ctx.fillText(""+playerState.adjective,  0, 120);
-    ctx.fillText(""+playerState.icon,       0, 140);
-    ctx.restore();
 }
 
-function drawGrid(grid) {
+function drawGrid(grid,ctx) {
     grid.forEach(function(hole) {
         ctx.save();
-        ctx.translate(hole.i*100+50+xoff, hole.j*100+50 + yoff);
+        ctx.translate(hole.i*gridSpacing+60+xoff, hole.j*gridSpacing+50 + yoff);
         ctx.fillStyle = calcHoleColor(hole);
         ctx.beginPath();
         ctx.arc(0,0, radius, 0, Math.PI*2);
@@ -231,12 +257,12 @@ function calcHoleColor(hole) {
 function startCountdown() {
     doAnim(
         { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
-        { at:   0,  target:'countdown-overlay', prop:'innerHTML', value:"3"},
-        { at: 500,  target:'countdown-overlay', prop:'innerHTML', value:"2"},
-        { at:1000,  target:'countdown-overlay', prop:'innerHTML', value:"1"},
-        { at:1500,  target:'countdown-overlay', prop:'innerHTML', value:"Go!"},
-        { at:2000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
-        { at: 2000, fun: function() {
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>3</b>"},
+        { at:1000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>2</b>"},
+        { at:2000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>1</b>"},
+        { at:3000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>Go!</b>"},
+        { at:4000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
+        { at:4000, fun: function() {
             console.log("really starting now");
             startRoundAnim();
         }}
@@ -397,11 +423,9 @@ function connect() {
         connect: function() {
             console.log("connected to pubnub");
             //state.connectionStatus = "connected";
-            //sync();
         },
         disconnect: function() {
             //state.connectionStatus = "disconnected";
-            //sync();
         }
     });
 

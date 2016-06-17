@@ -68,10 +68,10 @@ function startGame() {
             });
         }},
         { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
-        { at:   0,  target:'countdown-overlay', prop:'innerHTML', value:"<b>3</b>"},
-        { at:1000,  target:'countdown-overlay', prop:'innerHTML', value:"<b>2</b>"},
-        { at:2000,  target:'countdown-overlay', prop:'innerHTML', value:"<b>1</b>"},
-        { at:3000,  target:'countdown-overlay', prop:'innerHTML', value:"Go!"},
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>3</b>"},
+        { at:1000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>2</b>"},
+        { at:2000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>1</b>"},
+        { at:3000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>Go!</b>"},
         { at:4000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
         { at:4000, fun: function() {
             console.log("really starting now");
