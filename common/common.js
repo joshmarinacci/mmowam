@@ -71,11 +71,11 @@ function Anim(props) {
                 var elem = document.getElementById(this.target);
                 if(!elem) throw new Error('cannot find dom element ' + this.target);
                 if(this.propertyName) {
-                    console.log('evaluating the string version', this.target, this.propertyName, this.value);
+                    //console.log('evaluating the string version', this.target, this.propertyName, this.value);
                     elem[this.propertyName] = this.value;
                 }
                 if(this.style) {
-                    console.log("doing the style version", this.style, this.value);
+                    //console.log("doing the style version", this.style, this.value);
                     elem.style[this.style] = this.value;
                 }
                 this.state = this.STATES.STOPPED;
