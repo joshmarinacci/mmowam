@@ -12,7 +12,7 @@ var ANIMALS = ['bear','cat','chipmunk','dog','wolf','fox','lion','tiger','elepha
 
 var pubnub = null;
 var CHANNEL_NAME = "simple-channel";
-var ROUND_LENGTH = 10;
+var ROUND_LENGTH = 30;
 
 
 
@@ -39,7 +39,12 @@ var state = {
 
 
 function setup() {
+    var settings = processLocation();
     state.channelName = pick(COLORS)+'-'+pick(FLAVORS) + '-' + pick(ANIMALS);
+    if(settings.channel) {
+        state.channelName = settings.channel;
+    }
+    CHANNEL_NAME = state.channelName;
     new QRCode(document.getElementById("qrcode"), {
         width: 128,
         height: 128,

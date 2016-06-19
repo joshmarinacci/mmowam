@@ -64,7 +64,8 @@ var img = new Image();
 img.loaded = false;
 img.onload = function() {
     img.loaded = true;
-}
+};
+
 var avatar = {
     img: img,
     opacity: 1.0
@@ -82,27 +83,10 @@ function checkChannelName() {
     styleDom("channel-panel",'visibility','hidden');
     var channel_name = getDom('channel-name');
     console.log("the selected channel name is", channel_name);
-    //CHANNEL_NAME = channel_name;
+    CHANNEL_NAME = channel_name;
     connect();
 }
 
-function convertMouseToHole(e) {
-    var rect = canvas.getBoundingClientRect();
-    var pt1 = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-    };
-    var pt2 = { x: pt1.x/canvasScale, y: pt1.y/canvasScale};
-    var pt3 = {
-        x: Math.floor((pt2.x - xoff)/gridSpacing),
-        y: Math.floor((pt2.y - yoff)/gridSpacing)
-    };
-
-    if(pt3.x < 0 || pt3.x >= 4) return null;
-    if(pt3.y < 0 || pt3.y >= 4) return null;
-    var hole = grid[pt3.x+pt3.y*4];
-    return hole;
-}
 
 function calculateUUID() {
     if(settings.uuid) return settings.uuid;
@@ -123,7 +107,10 @@ function calculateAdjective() {
     return sessionStorage.getItem(key);
 }
 
+// ========== input functions ==============
 function handleInput(e) {
+    e.preventDefault();
+    e.stopPropagation();
     if(inputBlocked === true) {
         console.log("you must wait!");
         return;
@@ -134,6 +121,25 @@ function handleInput(e) {
         holeTap(hole);
     }
 }
+
+function convertMouseToHole(e) {
+    var rect = canvas.getBoundingClientRect();
+    var pt1 = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+    var pt2 = { x: pt1.x/canvasScale, y: pt1.y/canvasScale};
+    var pt3 = {
+        x: Math.floor((pt2.x - xoff)/gridSpacing),
+        y: Math.floor((pt2.y - yoff)/gridSpacing)
+    };
+
+    if(pt3.x < 0 || pt3.x >= 4) return null;
+    if(pt3.y < 0 || pt3.y >= 4) return null;
+    var hole = grid[pt3.x+pt3.y*4];
+    return hole;
+}
+
 function setup() {
     canvas = document.getElementById('canvas');
     /*
@@ -142,12 +148,8 @@ function setup() {
         handleInput(e);
     });
     */
-    canvas.addEventListener("mousedown", function(e) {
-        handleInput(e);
-    });
-    canvas.addEventListener("mouseup", function(e) {
-        //console.log("mouse up");
-    });
+    canvas.addEventListener("mousedown", handleInput);
+    canvas.addEventListener("mouseup", function(e) {});
     ctx = canvas.getContext('2d');
 
     drawScreen();
@@ -161,52 +163,43 @@ function setup() {
         styleDom("channel-panel",'visibility','visible');
         onClick("connect-button", checkChannelName);
     } else {
+        CHANNEL_NAME = settings.channel;
         connect();
     }
 }
 
-function checkInput() {
-    if(tapWaitStart == -1) return;
-    if(round_in_progress && new Date().getTime() - tapWaitStart > 3000) {
-        console.log("it's been a second!");
-        tapWaitStart = -1;
-        // if not top on hole while active, and timeout, anim out, start next set of active
-        //anim out the hole
-        //paralyze for 2 seconds
-        console.log("you must wait to seconds");
-        //avatar.text += 1;
-        delayTime();
-        //inputBlocked = true;
-        doAnim(
-            { at: 0, target:activeHole, prop:'highlight', from:1.0, to:0, dur: 500}
-            //{ at:2000, fun:startActive}
-        )
-    }
-}
+
+
+
+// ============ drawing functions =============
 
 function drawScreen() {
-    var rect = canvas.getBoundingClientRect();
-    var err = Math.abs(canvas.width - rect.width);
-    if(err > 2) {
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        var sc = canvas.width/idealWidth;
-        var sc2 = canvas.height/idealHeight;
-        canvasScale = Math.min(sc,sc2);
+    try {
+        var rect = canvas.getBoundingClientRect();
+        var err = Math.abs(canvas.width - rect.width);
+        if (err > 2) {
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            var sc = canvas.width / idealWidth;
+            var sc2 = canvas.height / idealHeight;
+            canvasScale = Math.min(sc, sc2);
+        }
+
+        checkInput();
+        updateAnims();
+
+        var ctx = canvas.getContext('2d');
+        ctx.save();
+        canvasXoff = canvas.width - idealWidth * canvasScale;
+        //ctx.translate(canvasXoff/2-10,0);
+        ctx.scale(canvasScale, canvasScale);
+        clearScreen(ctx);
+        drawGrid(grid, ctx);
+        drawOverlayText(ctx);
+        ctx.restore();
+    } catch(ex) {
+        console.log(ex);
     }
-
-    checkInput();
-    updateAnims();
-
-    var ctx = canvas.getContext('2d');
-    ctx.save();
-    canvasXoff = canvas.width - idealWidth*canvasScale;
-    //ctx.translate(canvasXoff/2-10,0);
-    ctx.scale(canvasScale,canvasScale);
-    clearScreen(ctx);
-    drawGrid(grid,ctx);
-    drawOverlayText(ctx);
-    ctx.restore();
     requestAnimationFrame(drawScreen);
 }
 
@@ -268,6 +261,10 @@ function calcHoleColor(hole) {
     if(hole.state == STATES.ACTIVE)   return 'rgba('+Math.floor(hole.highlight*255)+',0,0,1)';
 }
 
+
+
+// ============= actions ============
+
 function startCountdown() {
     doAnim(
         { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
@@ -284,27 +281,115 @@ function startCountdown() {
 }
 
 function startRoundAnim() {
-    console.log('startign the round ');
+    console.log('starting the round ');
     startText.text = "Tap only the RED holes";
     playerState.score = 0;
-    //avatar.text = 0;
     resetGrid();
     inputBlocked = false;
-    //do these in parallel
     doAnim(
-        { at:0,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
-        { at:2000, target:startText, prop:'opacity', from:1.0, to:0, dur: 500},
-        { at:0, fun: startActive}
-        //{ at: 10*1000, fun: endRound }
+        { at:0,    target:startText, prop:'opacity', from:0,   to:1.0, dur: 500},
+        { at:2000, target:startText, prop:'opacity', from:1.0, to:0,   dur: 500}
     );
+    startActive();
     round_in_progress = true;
     updateState();
 }
 
+function startActive() {
+    console.log('starting the active');
+    //set active holes
+    var holeNumber = pickRandomHole(grid);
+    activeHole = grid[holeNumber];
+    activeHole.state = STATES.ACTIVE;
+
+    doAnim(
+        { at:0, target: activeHole, prop:'highlight', from:0, to:1.0, dur: 300}
+    );
+
+    tapWaitStart = new Date().getTime();
+
+    if(settings.auto == 'true' && activeHole !== null) {
+        console.log("doing auto");
+        doAnim({
+            at: 1000, fun: function() {
+                console.log("doing auto");
+                if(!activeHole) return
+                holeTap(activeHole);
+            }
+        })
+    }
+}
+
+//called every animation frame
+function checkInput() {
+    if(tapWaitStart == -1) return;
+    //if playing a round
+    // and current time - tapwaitstart is greater than 3 seconds
+    //the user didn't tap anything.
+    if(round_in_progress && new Date().getTime() - tapWaitStart > 3000) {
+        console.log("it's been a second!");
+        tapWaitStart = -1;
+        // if not top on hole while active, and timeout, anim out, start next set of active
+        //anim out the hole
+        //paralyze for 2 seconds
+        console.log("you must wait two seconds");
+        //avatar.text += 1;
+        //delayTime();
+        //inputBlocked = true;
+        doAnim(
+            { at: 0, target:activeHole, prop:'highlight', from:1.0, to:0, dur: 500},
+            { at:2000, fun:startActive}
+        )
+    }
+}
+
+function blockInput() {
+    console.log("blocking input");
+    inputBlocked = true;
+}
+function unblockInput() {
+    console.log("unblocking input");
+    inputBlocked = false;
+}
+function delayTime() {
+    doAnim({ at: 2000, fun: function() {
+        if(round_in_progress) {
+            unblockInput();
+            startActive();
+        } else {
+            console.log("the game is over now");
+            unblockInput();
+        }
+    }})
+}
+
+function holeTap(hole) {
+    if(hole.state == STATES.ACTIVE) {
+        console.log("good tap");
+        incrementScore();
+        animHoleGood(hole);
+        playGoodSound();
+        //startActive();
+        hole.state = STATES.INACTIVE;
+        startActive();
+        return;
+    } else {
+        console.log("bad tap");
+        animHoleBad(activeHole);
+        activeHole.state = STATES.INACTIVE;
+        playBadSound();
+        blockInput();
+        tapWaitStart = -1;
+        delayTime();
+        return;
+    }
+}
+
 function endRound() {
+    console.log("ending round");
     tapWaitStart = -1;
     startText.text  = "Round Over";
-    inputBlocked = true;
+    unblockInput();
     doAnim(
         { at: 0, target: startText, prop:'opacity', from:0, to:1.0, dur: 500}
     );
@@ -317,28 +402,6 @@ function pickRandomHole(grid) {
     return Math.floor(Math.random()*grid.length);
 }
 
-function startActive() {
-    console.log('starting the active');
-    //set active holes
-    var holeNumber = pickRandomHole(grid);
-    grid[holeNumber].state = STATES.ACTIVE;
-    activeHole = grid[holeNumber];
-
-    doAnim(
-        { at:0, target: grid[holeNumber], prop:'highlight', from:0, to:1.0, dur: 300}
-    );
-
-    tapWaitStart = new Date().getTime();
-
-    if(settings.auto == 'true') {
-        doAnim({
-            at: 500, fun: function() {
-                console.log("doing auto");
-                holeTap(activeHole);
-            }
-        })
-    }
-}
 
 function animHoleGood(hole) {
     doAnim(
@@ -347,7 +410,7 @@ function animHoleGood(hole) {
 }
 
 function updateState() {
-    console.log("sending state", playerState)
+    console.log("sending state", JSON.stringify(playerState));
     pubnub.state({
         channel:CHANNEL_NAME,
         state: playerState
@@ -361,9 +424,7 @@ function incrementScore() {
 function playGoodSound() {
     //noop
 }
-function incrementBadTap() {
-    //avatar.text += 1;
-}
+
 function animHoleBad(hole) {
     doAnim(
         { at:0, target: hole, prop:'highlight', from:1.0, to:0, dur: 150}
@@ -372,48 +433,7 @@ function animHoleBad(hole) {
 function playBadSound() {
     //noop
 }
-function delayTime() {
-    inputBlocked = true;
-    tapWaitStart = -1;
-    doAnim({ at: 2000, fun: function() {
-        if(round_in_progress) {
-            inputBlocked = false;
-            //console.log("you can play again");
-            startActive();
-        } else {
-            console.log("the game is over now");
-        }
-    }})
-}
-function holeTap(hole) {
-    if(hole.state == STATES.ACTIVE) {
-        //console.log("good tap");
-        //hole.state = STATES.GOOD_TAP;
-        incrementScore();
-        animHoleGood(hole);
-        playGoodSound();
-        //startActive();
-        doAnim(
-            { at: 500, fun: function() {
-               //console.log("resetting the hole");
-                hole.state = STATES.INACTIVE
-            }},
-            //{ at:500,  target:startText, prop:'opacity', from:0, to:1.0, dur: 500},
-            //{ at:2000, target:startText, prop:'opacity', from:1.0, to:0, dur: 500},
-            { at:500, fun: startActive}
-        );
-        return;
-    }
-    if( hole.state == STATES.INACTIVE ) {
-        //console.log("bad tap");
-        //hole.state = STATES.;
-        incrementBadTap();
-        animHoleBad(activeHole);
-        playBadSound();
-        delayTime();
-        return;
-    }
-}
+
 
 
 function connect() {
@@ -429,7 +449,7 @@ function connect() {
     pubnub.subscribe({
         channel:CHANNEL_NAME,
         message: function(msg,env,chan) {
-            console.log("got a message",msg,env,chan);
+            //console.log("got a message",msg,env,chan);
             if(msg.type == 'action') {
                 executeRemoteAction(msg);
             }
@@ -463,7 +483,6 @@ var ACTIONS = {
 };
 
 function executeRemoteAction(act) {
-    console.log("executing action", act.action);
     ACTIONS[act.action](act.data);
 }
 
