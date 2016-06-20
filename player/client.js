@@ -279,6 +279,19 @@ function startCountdown() {
     );
 }
 
+function showConnecting() {
+    doAnim(
+        { at:   0,  target:'countdown-overlay', style:'visibility',value:'visible'},
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML',  value:"<i>connecting</i>"}
+    )
+}
+function hideConnecting() {
+    doAnim(
+        { at:   0,  target:'countdown-overlay', style:'visibility',value:'hidden'},
+        { at:   0,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>connected</b>"}
+    )
+}
+
 function startRoundAnim(seed) {
     console.log('starting the round ');
     mathSeed = seed;
@@ -442,6 +455,7 @@ function playBadSound() {
 
 
 function connect() {
+    showConnecting();
     pubnub = PUBNUB({
         publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
         subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
@@ -450,6 +464,8 @@ function connect() {
         },
         uuid:playerState.uuid
     });
+
+    playerState.name = playerState.uuid
 
     pubnub.subscribe({
         channel:CHANNEL_NAME,
@@ -462,14 +478,14 @@ function connect() {
         connect: function() {
             console.log("connected to pubnub with channel", CHANNEL_NAME);
             //state.connectionStatus = "connected";
+            hideConnecting();
+            updateState();
         },
         disconnect: function() {
             //state.connectionStatus = "disconnected";
         }
     });
 
-    playerState.name = playerState.uuid
-    updateState();
 }
 
 var ACTIONS = {
