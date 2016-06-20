@@ -17,6 +17,8 @@ var inputBlocked = false;
 var round_in_progress = false;
 var playerState = {
     uuid:"unknown-uuid",
+    adjective:"",
+    icon:"",
     score:0
 };
 var STATES = {
@@ -402,8 +404,8 @@ function pickRandomHole(grid) {
     var min = 0;
     mathSeed = (mathSeed * 9301 + 49297) % 233280;
     var rnd = mathSeed / 233280;
-    var val = Math.floor(min + rnd * (max - min));
-    return val;
+    var val = min + rnd * (max - min);
+    return Math.floor(val);
 }
 
 function animHoleGood(hole) {

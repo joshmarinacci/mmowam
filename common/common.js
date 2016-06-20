@@ -26,14 +26,12 @@ function getDom(id, value) {
 }
 
 function processLocation() {
+    var parms = {};
     if(document.location.search) {
-        var parms = {};
         document.location.search.substring(1).split("&").forEach(function(chunk){
             var parts =  chunk.split('=');
             parms[parts[0]] = parts[1];
         });
-    } else {
-        parms = {};
     }
     return parms;
 }

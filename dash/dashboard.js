@@ -235,9 +235,6 @@ function connect() {
     pubnub = PUBNUB({
         publish_key:"pub-c-f68c149c-2149-48dc-aeaf-ee3c658cfb8a",
         subscribe_key:"sub-c-51b69c64-3269-11e6-9060-0619f8945a4f",
-        error: function(err) {
-            console.log("error",err);
-        },
         uuid:'dashboard'
     });
 
