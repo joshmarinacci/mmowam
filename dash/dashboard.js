@@ -14,7 +14,10 @@ var pubnub = null;
 var CHANNEL_NAME = "simple-channel";
 var ROUND_LENGTH = 30;
 
-
+var audio1 = new Audio("../music/wonderland.mp3");
+//audio1.play();
+var audio2 = new Audio("../music/level1.mp3");
+audio2.play();
 
 var IDS = {
     CHANNEL_NAME: "channel-name",
@@ -66,6 +69,21 @@ function startGame() {
     }
     state.isPlaying = true;
     state.randomSeed = Math.floor(Math.random()*10*1000);
+    try {
+        if(!audio2.paused) {
+            audio2.pause();
+            audio2.currentTime = 0;
+        }
+        if(!audio1.paused) {
+            audio1.pause();
+            audio1.currentTime = 0;
+        }
+        setTimeout(function() {
+            audio1.play();
+        },150);
+    } catch (ex){
+        console.log(ex);
+    }
     //show overlay
     doAnim(
         { at:   0,  fun: function() {
@@ -107,6 +125,11 @@ function startGame() {
 function stopGame() {
     state.timeLeft = 0;
     clearInterval(timer_id);
+    if(!audio1.paused) audio1.pause();
+    audio1.currentTime = 0;
+    if(!audio2.paused) audio2.pause();
+    audio2.play();
+
     pubnub.publish({
         channel:CHANNEL_NAME,
         message: {
@@ -140,11 +163,27 @@ function endRound() {
             winner = player;
         }
     });
-    //blink the winner text
-    doAnim(
-        { at: 0, target:'countdown-overlay', prop:'innerHTML',   value: "<b>"+winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!</b>"},
-        { at: 0, target:'countdown-overlay', style:'visibility', value:'visible'}
-    )
+    if(winner !== null) {
+        doAnim(
+            {
+                at: 0,
+                target: 'countdown-overlay',
+                prop: 'innerHTML',
+                value: "<b>" + winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!</b>"
+            },
+            {at: 0, target: 'countdown-overlay', style: 'visibility', value: 'visible'}
+        )
+    } else {
+        doAnim(
+        {
+            at: 0,
+                target: 'countdown-overlay',
+            prop: 'innerHTML',
+            value: "<b>No Winner. <br/> Frowny Face!</b>"
+        },
+        {at: 0, target: 'countdown-overlay', style: 'visibility', value: 'visible'}
+        )
+    }
 
 }
 
