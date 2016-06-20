@@ -2,9 +2,6 @@
  * Created by josh on 6/14/16.
  */
 
-
-console.log("loading the dashboard");
-
 var BASE_URL = "http://joshondesign.com/p/apps/mmowam/player/?channel=";
 var COLORS = ["red","green","blue","orange","black","white","purple",'brown','gray'];
 var FLAVORS = ["salty",'sweet','spicy','tangy','sour','bland'];
@@ -17,7 +14,6 @@ var ROUND_LENGTH = 30;
 var audio1 = new Audio("../music/wonderland.mp3");
 //audio1.play();
 var audio2 = new Audio("../music/level1.mp3");
-audio2.play();
 
 var IDS = {
     CHANNEL_NAME: "channel-name",
@@ -56,6 +52,7 @@ function setup() {
         colorLight : "#ffff00",
         text:BASE_URL+state.channelName
     });
+    audio2.play();
     sync();
     connect();
     onClick(IDS.START_GAME,startGame);
