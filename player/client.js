@@ -53,6 +53,7 @@ var gridSpacing = 95;
 var canvasScale = 1.5;
 var idealWidth = 400;
 var idealHeight = 600;
+var mathSeed = 0;
 
 var startText = {
     text : "Tap only the RED holes",
@@ -272,16 +273,13 @@ function startCountdown() {
         { at:1000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>2</b>"},
         { at:2000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>1</b>"},
         { at:3000,  target:'countdown-overlay', prop:'innerHTML',  value:"<b>Go!</b>"},
-        { at:4000,  target:'countdown-overlay', style:'visibility',value:'hidden'},
-        { at:4000, fun: function() {
-            console.log("really starting now");
-            startRoundAnim();
-        }}
+        { at:4000,  target:'countdown-overlay', style:'visibility',value:'hidden'}
     );
 }
 
-function startRoundAnim() {
+function startRoundAnim(seed) {
     console.log('starting the round ');
+    mathSeed = seed;
     startText.text = "Tap only the RED holes";
     playerState.score = 0;
     resetGrid();
@@ -398,10 +396,15 @@ function endRound() {
     resetGrid();
 }
 
+//http://indiegamr.com/generate-repeatable-random-numbers-in-js/
 function pickRandomHole(grid) {
-    return Math.floor(Math.random()*grid.length);
+    var max = grid.length;
+    var min = 0;
+    mathSeed = (mathSeed * 9301 + 49297) % 233280;
+    var rnd = mathSeed / 233280;
+    var val = Math.floor(min + rnd * (max - min));
+    return val;
 }
-
 
 function animHoleGood(hole) {
     doAnim(
@@ -473,8 +476,8 @@ var ACTIONS = {
         startCountdown();
     },
     start: function(args) {
-        console.log("starting the game", args);
-        startRoundAnim();
+        console.log("starting the game", args.seed);
+        startRoundAnim(args.seed);
     },
     end: function(args) {
         console.log("ending a round");
