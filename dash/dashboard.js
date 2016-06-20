@@ -35,6 +35,7 @@ var state = {
     playerList: [],
     connectionStatus:"not-connected",
     timeLeft: -1,
+    isPlaying: false,
 };
 
 
@@ -60,6 +61,10 @@ function setup() {
 
 
 function startGame() {
+    if(state.isPlaying) {
+        stopGame();
+    }
+    state.isPlaying = true;
     state.randomSeed = Math.floor(Math.random()*10*1000);
     //show overlay
     doAnim(
@@ -99,11 +104,23 @@ function startGame() {
 
 }
 
+function stopGame() {
+    state.timeLeft = 0;
+    clearInterval(timer_id);
+    pubnub.publish({
+        channel:CHANNEL_NAME,
+        message: {
+            "type":"action",
+            "action":"end"
+        }
+    });
+    state.isPlaying = false;
+}
+
 var timer_id;
 function startTimer() {
     state.timeLeft = ROUND_LENGTH;
     timer_id = setInterval(function() {
-        console.log("counting down");
         state.timeLeft--;
         sync();
         if(state.timeLeft < 0) {
@@ -114,7 +131,7 @@ function startTimer() {
 }
 
 function endRound() {
-    state.timeLeft = 0;
+    stopGame();
     var winner = null;
     state.playerList.forEach(function(player) {
         if(!player.state.score) return;
@@ -124,13 +141,6 @@ function endRound() {
         }
     });
     //blink the winner text
-    pubnub.publish({
-        channel:CHANNEL_NAME,
-        message: {
-            "type":"action",
-            "action":"end"
-        }
-    });
     doAnim(
         { at: 0, target:'countdown-overlay', prop:'innerHTML',   value: "<b>"+winner.state.adjective + " " + winner.state.icon + " Wins!<br/>Fatality!</b>"},
         { at: 0, target:'countdown-overlay', style:'visibility', value:'visible'}
