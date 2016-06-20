@@ -224,7 +224,7 @@ function syncPlayerList(id, value) {
         return "<li class='player-status'>"
             +"<span class='player-name'>" + name + "</span>"
             +"<img  class='player-icon' src='"+img+"' />"
-            +"<span class='player-score-wrapper'><span class='player-score' style='width:"+(score/10*100)+"%;'>" + player.state.score + "</span></span>"
+            +"<span class='player-score-wrapper'><span class='player-score' style='width:"+(score/30*100)+"%;'>" + player.state.score + "</span></span>"
             +"</li>"
     }).join("");
 }
