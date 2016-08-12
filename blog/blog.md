@@ -1,15 +1,16 @@
 # MMOWAM:  Massively Multiplayer Online Whack-A-Mole
 
-This blog is based on my talk from NodePDX 2016. You can watch [the full video of my session](link), or
+This blog is based on my talk from NodePDX 2016. You can watch [the full video of my session](https://www.youtube.com/watch?v=M0InR6sjH_Y&feature=youtu.be), or
 read my other writings on [my personal blog](http://joshondesign.com/).
 
 # Building a Casual Gaming MMO
 
-Today I'm going to build a casual Massively Multiplayer Online game. Something that can have 50 or more people playing at the same time.  And I’m going to do it without writing any server side code. Yes, no server code at all. Your first question is probably: *why on earth would you want to do this*? Why are you going to make an MMO without any server side code?
+Today I'm going to build a casual Massively Multiplayer Online game. Something that can have 50 or more people playing at the same time.  And I’m going to do it without writing any server side code. Yes, no server code at all. Your first question is probably: *Why on earth would anyone want to do this*? Why are you going to make an MMO without any server side code?
 
-In my day job I work on [realtime networks](http://www.pubnub.com/) for a startup in San Francisco. Most of our customers use our DSN (Data Stream Network) for chat applications and vehicle tracking. This makes sense, people like to communicate and they want to know when the bus is coming. When the RFP came up for NodePDX (Portland's Premier JavaScript conference) one of my co-workers suggested I build a game.
+In my day job I work on [realtime networks](http://www.pubnub.com/) for a startup in San Francisco. Most of our customers use our DSN (Data Stream Network) for chat applications and vehicle tracking. This makes sense, people like to communicate and they want to know when the bus is coming. When the RFP came up for [NodePDX](http://nodepdx.org) (Portland's Premier JavaScript conference) one of my co-workers suggested I build a game 
+instead of the usual chat app.
 
-The challenge is I'm not really a gamer anymore. I don't have the time to get deep into games, and certainly not the time to become competitive with guys who spend hours and hours honing their craft. Instead I like playing games with people around me.  I like board games and Mario Kart. Games anyone can pick up and enjoy, with no prior training. So my challenge was to create a game that's realtime and can accommodate far more people than a board game could handle. What would it be like to play with 20 people at once, when you're all in the same room.  That led me to one of my all-time favorite boardwalk games: Whack-A-Mole.
+The challenge is I'm not really a gamer anymore. I don't have the time to get deep into games, and certainly not the time to become competitive with guys who spend hours and hours honing their craft. Instead I like playing games with people around me.  I like board games and Mario Kart. Games anyone can pick up and enjoy, with no prior training. So my challenge was to create a game that's both realtime and can accommodate far more people than a board game could handle. What would it be like to play with 20 people at once, when you're all in the same room?  That led me to one of my all-time favorite boardwalk games: [Whack-A-Mole](https://en.wikipedia.org/wiki/Whac-A-Mole).
 
 Whack-A-Mole is awesome. It requires no learning; even little kids can play it. It does have some skill, but you can get pretty far knowing nothing at all.  And most importantly, it's fun whether are winning or losing. Everyone loves smashing cute cartoon creatures. (It also happens to be fairly easy to code. No 3D modeling required.) Now imagine if you could play Whack-A-Mole on a big screen TV or projector, but let everyone use their existing smartphone as their controller.  This is the dream.
 
@@ -22,22 +23,23 @@ While Whack-A-Mole is conceptually simple, actually getting a bunch of people to
 
 # the UI
 
-My game has two pages, one for the big screen and one for the player's phones.  The big screen is the dashboard. It shows when a round starts and who's winning.  The phone UI shows the game board. It tells the player when to start playing, then gives them a grid of holes to tap on. It currently shows the moles by turning a circle red. A better version would have had little cartoon moles, but I didn't have time before the conference. I'll add that later. BTW, the source to all of this is in my [MMOWAM github repo](link).
+My game has two pages, one for the big screen and one for the player's phones.  The big screen is the dashboard. It shows when a round starts and who's winning.  The phone UI shows the game board. It tells the player when to start playing, then gives them a grid of holes to tap on. It currently shows the moles by turning a circle red. A better version would have had little cartoon moles, but I didn't have time before the conference. I'll add that later. BTW, the source to all of this is in my [MMOWAM github repo](https://github.com/joshmarinacci/mmowam).
 
 Here’s what the dashboard looks like on a large screen, say a TV or a projector at a conference.
 
-![Dashboard Screenshot](image)
+![Dashboard Screenshot](./images/dash-screenshot.png)
 
 Here’s what the client looks like on a phone.
 
-![Player Screenshot](image)
+![Player Screenshot 1](images/client-screenshot-1.png)
+![Player Screenshot 2](images/client-screenshot-2.png)
 
-Since you're reading this on a game developer website I assume you have your own favorite framework, so I won't go through all of the code for the actual game UI parts. It's all pretty straight forward web coding. I didn't use any game frameworks. The dashboard is plain HTML with CSS and a few property animations. The client uses bog standard HTML Canvas. They share a few common utility functions for event handling an animation in the `common` directory of the source repo.
+Since you're reading this on a game developer website I assume you have your own favorite framework, so I won't go through all of the code for the actual game UI parts. It's all pretty straight forward web coding. I didn't use any game frameworks. The dashboard is plain HTML with CSS and a few property animations. The client uses bog standard HTML Canvas. They share a few common utility functions for event handling and animation in the `common` directory of the [source repo](https://github.com/joshmarinacci/mmowam).
 
 # The Networking
 
 
-Now that we have a basic app, how do we get actually connect players together?  The magic part is a [Data Stream Network](link). This is a service which creates high performance low-latency data stream channels over the global Internet. The data all goes through their network, not your own server, so we can call it from static HTML. It sends JSON messages, sort of like web-sockets, but at a massive scale. They handle keeping latency down, reliability up, etc. PubNub provides a high volume free tier so traffic won't be a problem. The DSN handles the basic mechanics of connecting players but we still have a few problems to solve:
+Now that we have a basic app, how do we get actually connect players together?  The magic part is a [Data Stream Network](https://www.pubnub.com/products/global-data-stream-network/). This is a service which runs high performance low-latency data stream channels over the global Internet. The data all goes through their network, not your own server, so we can call it from static HTML. It sends JSON messages, sort of like web-sockets, but at a massive scale. They handle keeping latency down, reliability up, etc. PubNub provides a high volume free tier so traffic won't be a problem. The DSN handles the basic mechanics of connecting players but we still have a few problems to solve:
 
 * There could be more than one TV showing a dashboard at a once. How can they each host their own game without having a real server?
 * How do players connect specifically to the dashboard they see in front of them, not some other random dashboard (alternatively, how do we prevent people who aren't actually at the event from joining the game)
@@ -53,7 +55,7 @@ Let's take these one by one.
 First, we need some sense of a game world that players can join. Channels in the DSN each have unique names, so we can generate a random channel name and use that for our game world. If everyone connects to the same channel then they will be playing the same game. This also lets us encode the game world into a parameter of a link. Yes a fully shareable link that can go anywhere on the web (or email, or twitter, or messaging, or...) Of course typing a long random number by hand is annoying, so instead let's generate a random series of words instead.
 
 
-For this game I connect to the PubNub network with my [publish and subscribe](link) keys, then  generate a channel name by randomly picking three values from a set of colors, flavors, and animals.
+For this game I connect to the PubNub network with my publish and subscribe keys, then  generate a channel name by randomly picking three values from a set of colors, flavors, and animals.
 
 
 ```
@@ -90,9 +92,11 @@ A player can join the game by typing the channel name into a text box when they 
 
 This introduces a new problem, though. Suppose we want the player to type in a long URL like this:
 
+```
 http://joshondesign.com/p/apps/mmowam/player/?channel=gray-salty-elephant
+```
 
-One mistake and you get a 404 error, or worse you get to the page but to a slightly different channel and you don’t realize it. Suddenly you are playing the wrong game! But there's a better way: use a QR Code using this awesome JS library from [Sangmin Shim](link).
+One mistake and you get a 404 error, or worse you get to the page but to a slightly different channel and you don’t realize it. Suddenly you are playing the wrong game! But there's a better way: use a QR Code using this awesome JS library from [Sangmin Shim](https://github.com/davidshimjs/qrcodejs).
 
 ```
 // thanks Sangmin Shim
@@ -107,9 +111,9 @@ new QRCode(document.getElementById("qrcode"), {
 });
 ```
 
-Using this amazing library in just a few lines of code you can generate the QR code in the browser w/ HTML Canvas. If we display this URL on the dashboard then someone can just scan it to immediately join the game. I love this immediacy. Scan and you are ready to play. (now, if only Apple would recognize QR codes in their default camera app).
+Using this amazing library in just a few lines of code you can generate the QR code in the browser with HTML Canvas. If we display this URL on the dashboard then someone can just scan it to immediately join the game. I love *the immediacy* of QR codes. Scan and you are ready to play. (now, if only Apple would recognize QR codes in their default camera app).
 
-![Another screenshot of the dashboard](link)
+![Detail of the QR Code](images/qrcode.png)
 
 
 Now we can connect all the players, but how does one player know who they are on the dashboard if we don't have accounts or user names. How do we show who wins? When in doubt, randomly generate something.
@@ -146,7 +150,7 @@ Also note that I saved the player info in session storage so if the user hits re
 
 Now we get to some real networking code. After the player's screen loads and generates unique info for them, we'll send this player state to the dashboard through the common channel. We could send this as regular messages but what happens if a player loads their screen just a tiny bit before the dashboard, or if it has to reload. The dashboard might miss a player message. We need some sort of persistent state.
 
-In a traditional system this would be the job of the central server to handle identity, but we don’t want a central server. It turns out the DSN also has the ability to [store a little bit of state](state api link).  Using the `state()` function we can add extra values we want to store like this.
+In a traditional system this would be the job of the central server to handle identity, but we don’t want a central server. It turns out the DSN also has the ability to [store a little bit of state](https://www.pubnub.com/docs/web-javascript/api-reference#user-state).  Using the `state()` function we can add extra values we want to store like this.
 
 
 ```
@@ -222,6 +226,7 @@ function startGame() {
 ```
 
 On the client side, each player's phone picks the next hole to light up using the same pRNG function with the seed for that round.   This ensures everyone gets the same hole sequence.
+
 ```
 //player side
 function pickRandomHole(grid) {
@@ -234,13 +239,11 @@ function pickRandomHole(grid) {
 }
 ```
 
-
-
 # Make It Nice
 
 That's the core of our game. The rest is just making it pretty. Since I mostly used standard CSS and Canvas I'll just cover a few interesting details.
 
-CSS now has vmin/vmax/hmin/hmax units which equal 1% of the max and min width and height of the page. Combined with flexbox you can easily center and scale a div to fit the page.
+CSS now has vmin/vmax/hmin/hmax units which equal 1% of the max and min width and height of the page. Combined with FlexBox you can easily center and scale a div to fit the page.
 
 ```
 Scalable HTML (vmin/vmax & flexbox are awesome!)
@@ -266,21 +269,33 @@ I received some wonderful retro sounding music from a composer friend of mine, P
 
 The icons for the game all came from [Kenny.nl's awesome Animal Pac](http://kenney.nl/assets/animal-pac)
 
+![KennyNL](images/kennynl.png)
 
 
 # Future Work
 
-My vision is for in-person casual games played many massive numbers of people. Different screens across multiple platforms working together for maximum gaming fun. I can easily see this idea extended to interactive games at parties, interactive exhibits at children's museums, or collaborative music at conventions.  The very concept of massively multi-player casual games got me to thinking:
+My vision is for in-person casual games played by massive numbers of people. Different screens across multiple platforms working together for maximum gaming fun! I can easily see this idea extended to interactive games at parties, interactive exhibits at children's museums, or collaborative music at conventions.  The very concept of massively multi-player casual games got me to thinking:
 
 
-* What would 10 person Tetris? be like?
-* What about a snake game where the players *vote on the snake’s direction*?
-* MMO-Presentations: Attendees vote and chat on top of a live video stream in realtime, *like MTV Popup Video*.
+* What would 10 person Tetris be like? Would you play against each other or together?
+* What about a snake game where the players *vote on the snake’s direction* at every timestep?
+* MMO-Presentations: Attendees could vote and chat on top of a live video stream of your 
+presentation in realtime, *like MTV Popup Video*. Horrifying!
 
 Thank you. Let’s Play!
 
-resources
 
-* source on github
-* live demo of my game
-* pubnub docs for JavaScript
+# Play Now
+
+To try the game yourself have one person [load the dashboard](http://joshondesign.com/p/apps/mmowam/dash/) and turn up the volume (all  music comes from the dashboard).
+ 
+Then each player can load the game client from the URL printed on the dashboard. Alternatively, they can load [this page](http://joshondesign.com/p/apps/mmowam/player/) and then type in the channel name, or of course use the QR code.
+ 
+Once your players in the game, press the start button!
+
+
+* The [full source](https://github.com/joshmarinacci/mmowam) on GitHub
+* The [live dashboard](http://joshondesign.com/p/apps/mmowam/dash/) of the game
+* PubNub [docs for JavaScript](https://www.pubnub.com/docs/web-javascript/pubnub-javascript-sdk)
+
+
